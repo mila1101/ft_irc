@@ -6,14 +6,23 @@
 /*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 16:05:12 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/09 16:55:07 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/13 23:28:41 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef SERVER_HPP
-#define SERVER_HPP
+#pragma once
 
 #include <string>
+#include <vector>
+#include <netinet/in.h> // sockaddr_in
+#include <poll.h> // poll
+#include <memory> 
+#include <stdexcept>
+#include <unistd.h>
+#include <arpa/inet.h> // inet_ntoa
+#include <fcntl.h> // fcntl
+
+class SocketHandler;
 
 class Server
 {
@@ -22,10 +31,26 @@ class Server
         Server(int port, const std::string& password);
         ~Server();
 
+        // Server lifecycle
+        void run();
+        void stop();
         
     private:
-        int serverSocket_;
+        int port_;
+        std::string password_;
+        int listenFd_;
+        bool running_;
+
+        sockaddr_in serverAddr_;
+        std::vector<struct pollfd> pollFds_;
+
+        std::unique_ptr<SocketHandler> socketHandler_;
+
+        bool initSocket(); // Init server socket
+        void setupPoll(); // Init pollFds
+        void pollLoop(); 
+
+        void handleIncomingConnection(); // When event on server socket
+        void handleClientMessage(int fd); // When event on client socket
 
 };
-
-#endif
