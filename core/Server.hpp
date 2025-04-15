@@ -16,12 +16,13 @@
 #include <vector>
 #include <netinet/in.h> // sockaddr_in
 #include <poll.h> // poll
-#include <memory> 
+#include <memory>
 #include <stdexcept>
 #include <unistd.h>
 #include <arpa/inet.h> // inet_ntoa
 #include <fcntl.h> // fcntl
 #include <unordered_map> //for commands
+#include "../utils/Logger.hpp"
 
 class SocketHandler;
 
@@ -35,7 +36,7 @@ class Server
         // Server lifecycle
         void run();
         void stop();
-        
+
     private:
         int port_;
         std::string password_;
@@ -49,7 +50,7 @@ class Server
 
         bool initSocket(); // Init server socket
         void setupPoll(); // Init pollFds
-        void pollLoop(); 
+        void pollLoop();
 
         void handleIncomingConnection(); // When event on server socket
         void handleClientMessage(int fd); // When event on client socket
