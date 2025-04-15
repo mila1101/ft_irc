@@ -6,90 +6,83 @@
 /*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 23:03:14 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/15 16:34:43 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/15 17:04:38 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "SocketHandler.hpp"
 
-SocketHandler::SocketHandler() {}
+SocketHandler::SocketHandler(std::vector<struct pollfd>& pollFds)
+	: pollFds_(pollFds) {}
 
 SocketHandler::~SocketHandler() {}
 
-// To Do
-void SocketHandler::acceptConnection(int listenFd, std::vector<struct pollfd>& pollFds)
+void SocketHandler::acceptConnection(int listenFd)
 {
-	struct sockaddr_in clientAddr;
-	socklen_t clientLen = sizeof(clientAddr);
+	sockaddr_in clientAddr;
+	socklen_t addrLen = sizeof(clientAddr);
 
-	int clientFd = accept(listenFd, (struct sockaddr*)&clientAddr, &clientLen);
+	int clientFd = accept(listenFd, (struct sockaddr*)&clientAddr, &addrLen);
 	if (clientFd < 0)
 	{
-		Logger::error ("Failed to accept connection");
+		Logger::warning("accept() failed");
 		return;
 	}
 
-	Logger::log(LogLevel::Connection, "New connection from " + std::string(inet_ntoa(clientAddr.sin_addr)));
+	if (fcntl(clientFd, F_SETFL, O_NONBLOCK) < 0) 
+	{
+		Logger::warning("Failed to set non-blocking mode for client");
+		close(clientFd);
+		return;
+	}
 
-	addClientSocket(clientFd, pollFds);
+	addClientSocket(clientFd);
+	Logger::log(LogLevel::Connection, "New client connected: fd=" + std::to_string(clientFd));
 }
 
-// To Do
 void SocketHandler::receiveMessage(int clientFd)
 {
-	char buffer[1024];
-
-	for (size_t i = 0; i < sizeof(buffer); ++i)
-		buffer[i] = 0;
-
+	char buffer[1024] = {0}; 
 	ssize_t bytesRead = recv(clientFd, buffer, sizeof(buffer) - 1, 0);
+
 	if (bytesRead <= 0)
 	{
 		if (bytesRead == 0)
-		{
 			Logger::log(LogLevel::Disconnection, "Client disconnected");
-		}
 		else
-		{
-			Logger::error("Error reading from client");
-		}
-
-		if (pollFds_)
-			disconnectClient(clientFd, *pollFds_);
-		else
-			Logger::error ("pollFds_ is NULL");
-
+			Logger::warning("recv() failed on fd = " + std::to_string(clientFd));
+		disconnectClient(clientFd);
 		return;
 	}
 
-	Logger::log(LogLevel::Privmsg, "Received: " + std::string(buffer));
+	std::string message(buffer);
+	Logger::log(LogLevel::Privmsg, "Message from fd " + std::to_string(clientFd) + ": " + message);
 
-	send(clientFd, buffer, bytesRead, 0);
+	send(clientFd, message.c_str(), message.length(), 0); // TO DO: connect with dispatcher
 }
 
-// To Do
-void SocketHandler::addClientSocket(int clientFd, std::vector<struct pollfd>& pollFds)
+void SocketHandler::addClientSocket(int clientFd)
 {
-	struct pollfd clientPollFd;
-	clientPollFd.fd = clientFd;
-	clientPollFd.events = POLLIN;
-	clientPollFd.revents = 0;
-
-	pollFds.push_back(clientPollFd);
+	struct pollfd clientPoll = 
+	{
+		.fd = clientFd,
+		.events = POLLIN,
+		.revents = 0
+	};
+	pollFds_.push_back(clientPoll);
 }
 
-// To Do
-void SocketHandler::disconnectClient(int clientFd, std::vector<struct pollfd>& pollFds)
+
+void SocketHandler::disconnectClient(int clientFd)
 {
 	close(clientFd);
 
-	for (std::vector<struct pollfd>::iterator it = pollFds.begin(); it != pollFds.end(); )
-	{
-		if (it->fd == clientFd)
-			it = pollFds.erase(it);
-		else
-			++it;
+	for (auto it = pollFds_.begin(); it != pollFds_.end(); ++it) {
+		if (it->fd == clientFd) {
+			pollFds_.erase(it);
+			break;
+		}
 	}
 
-	Logger::log(LogLevel::Disconnection, "Client disconnected");
+	Logger::log(LogLevel::Disconnection, "Closed and removed client fd " + std::to_string(clientFd));
 }

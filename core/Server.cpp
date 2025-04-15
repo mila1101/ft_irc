@@ -6,7 +6,7 @@
 /*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 16:05:10 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/15 16:33:03 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/15 17:04:55 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ Server::Server (int port, const std::string& password)
 
 	setupPoll();
 
-	socketHandler_ = std::make_unique<SocketHandler>();
+	socketHandler_ = std::make_unique<SocketHandler>(pollFds_);
 	Logger::info ("Server initialized on port " + std::to_string(port_));
 }
 
@@ -137,7 +137,7 @@ void Server::pollLoop()
 
 void Server::handleIncomingConnection()
 {
-	socketHandler_->acceptConnection(listenFd_, pollFds_);
+	socketHandler_->acceptConnection(listenFd_);
 }
 
 void Server::handleClientMessage(int clientFd)

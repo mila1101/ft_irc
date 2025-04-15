@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SocketHandler.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: msoklova <msoklova@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 23:03:12 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/15 16:01:36 by msoklova         ###   ########.fr       */
+/*   Updated: 2025/04/15 17:01:24 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,15 +27,15 @@
 class SocketHandler
 {
 	public:
-		SocketHandler();
+		explicit SocketHandler(std::vector<struct pollfd>& pollFds);
 		~SocketHandler();
 
-		void acceptConnection(int listenFd, std::vector<struct pollfd>& pollFds);
+		void acceptConnection(int listenFd);
 		void receiveMessage(int clientFd);
 
 	private:
-		void addClientSocket(int clientFd, std::vector<struct pollfd>& pollFds);
-		void disconnectClient(int clientFd, std::vector<struct pollfd>& pollFds);
+		void addClientSocket(int clientFd);
+		void disconnectClient(int clientFd);
 
-		std::vector<struct pollfd>* pollFds_;
+		std::vector<struct pollfd>& pollFds_; // Eunsu: better with reference that pointer
 };
