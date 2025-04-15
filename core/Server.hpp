@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: smiranda <smiranda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 16:05:12 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/13 23:28:41 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/15 16:33:55 by smiranda         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 #include <unistd.h>
 #include <arpa/inet.h> // inet_ntoa
 #include <fcntl.h> // fcntl
+#include <unordered_map> //for commands
 
 class SocketHandler;
 
@@ -53,4 +54,11 @@ class Server
         void handleIncomingConnection(); // When event on server socket
         void handleClientMessage(int fd); // When event on client socket
 
+        // Commad table variable
+        using cmdFunction = void (Server::*)(int, const std::string&);
+        std::unordered_map<std::string, std::function<void(int, std::string const&)>> commandTable;
+
+        // Commands
+        void addCommand(const std::string& name, cmdFunction handler);
+        void commandInit();
 };
