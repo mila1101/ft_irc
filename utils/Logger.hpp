@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Logger.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: msoklova <msoklova@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 23:16:55 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/15 16:12:37 by msoklova         ###   ########.fr       */
+/*   Updated: 2025/04/15 16:32:46 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,10 +34,9 @@ enum class LogLevel {
 class Logger
 {
 	public:
-		static void logMessage (LogLevel level, const std::string& message, bool exitAfter = false);
+		static void log (LogLevel level, const std::string& message, bool exitAfter = false);
 
 		static void info (const std::string& message);
 		static void warning (const std::string& message);
 		static void error (const std::string& message, bool exitAfter = false);
-        static void log(LogLevel level, const std::string& message, bool exitAfter = false);
 };

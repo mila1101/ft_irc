@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Logger.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: msoklova <msoklova@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 23:30:17 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/15 16:12:22 by msoklova         ###   ########.fr       */
+/*   Updated: 2025/04/15 16:35:08 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@
 #define CYAN    "\033[36m"
 #define GRAY    "\033[90m"
 
-void Logger::logMessage (LogLevel level, const std::string& message, bool exitAfter)
+void Logger::log (LogLevel level, const std::string& message, bool exitAfter)
 {
 	std::time_t now = std::time(nullptr);
 	std::tm* tm_info = std::localtime(&now);
@@ -55,22 +55,18 @@ void Logger::logMessage (LogLevel level, const std::string& message, bool exitAf
 }
 
 
-void Logger::log(LogLevel level, const std::string& message, bool exitAfter)
-{
-    logMessage(level, message, exitAfter);
-}
 
 void Logger::info (const std::string& message)
 {
-	logMessage(LogLevel::Info, message);
+	log(LogLevel::Info, message);
 }
 
 void Logger::warning (const std::string& message)
 {
-	logMessage(LogLevel::Warning, message);
+	log(LogLevel::Warning, message);
 }
 
 void Logger::error (const std::string& message, bool exitAfter)
 {
-	logMessage(LogLevel::Error, message, exitAfter);
+	log(LogLevel::Error, message, exitAfter);
 }

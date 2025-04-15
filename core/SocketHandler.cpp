@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SocketHandler.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: msoklova <msoklova@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 23:03:14 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/15 16:02:04 by msoklova         ###   ########.fr       */
+/*   Updated: 2025/04/15 16:34:43 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ void SocketHandler::acceptConnection(int listenFd, std::vector<struct pollfd>& p
 	int clientFd = accept(listenFd, (struct sockaddr*)&clientAddr, &clientLen);
 	if (clientFd < 0)
 	{
-		Logger::log(LogLevel::Error, "Failed to accept connection");
+		Logger::error ("Failed to accept connection");
 		return;
 	}
 
@@ -51,13 +51,13 @@ void SocketHandler::receiveMessage(int clientFd)
 		}
 		else
 		{
-			Logger::log(LogLevel::Error, "Error reading from client");
+			Logger::error("Error reading from client");
 		}
 
 		if (pollFds_)
 			disconnectClient(clientFd, *pollFds_);
 		else
-			Logger::log(LogLevel::Error, "pollFds_ is NULL");
+			Logger::error ("pollFds_ is NULL");
 
 		return;
 	}

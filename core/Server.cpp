@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: msoklova <msoklova@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 16:05:10 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/15 16:08:19 by msoklova         ###   ########.fr       */
+/*   Updated: 2025/04/15 16:33:03 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,6 @@
 #include "SocketHandler.hpp"
 #include "../utils/Logger.hpp"
 
-void Server::logMessage(LogLevel level, const std::string& message, bool exitAfter)
-{
-	Logger::log(level, message, exitAfter);
-}
 
 Server::Server (int port, const std::string& password)
 	: port_(port), password_(password), listenFd_(-1), running_(false)
