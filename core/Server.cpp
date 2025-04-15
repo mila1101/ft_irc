@@ -6,13 +6,13 @@
 /*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 16:05:10 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/13 23:05:09 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/15 15:55:07 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 #include "SocketHandler.hpp"
-#include "utils/Logger.hpp"
+#include "../utils/Logger.hpp"
 
 Server::Server (int port, const std::string& password)
 	: port_(port), password_(password), listenFd_(-1), running_(false)
@@ -23,7 +23,7 @@ Server::Server (int port, const std::string& password)
 	setupPoll();
 
 	socketHandler_ = std::make_unique<SocketHandler>();
-	logMessage(LogLevel::Info, "Server initialized on port " + std::to_string(port_));
+	Logger::info ("Server initialized on port " + std::to_string(port_));
 }
 
 Server::~Server()
@@ -35,14 +35,14 @@ Server::~Server()
 void Server::run()
 {
 	running_ = true;
-	logMessage(LogLevel::Info, "Server is running");
+	Logger::info ("Server is running");
 
 	while (running_)
 	{
 		pollLoop();
 	}
 
-	logMessage(LogLevel::Info, "Server stopped");
+	Logger::info("Server stopped");
 }
 
 void Server::stop()
@@ -56,7 +56,7 @@ bool Server::initSocket()
 	listenFd_ = socket(AF_INET, SOCK_STREAM, 0);
 	if (listenFd_ < 0)
 	{
-		logMessage(LogLevel::Error, "Failed to create socket", true);
+		Logger::error("Failed to create socket", true);
 		return false;
 	}
 
@@ -64,14 +64,14 @@ bool Server::initSocket()
 	int opt = 1;
 	if (setsockopt(listenFd_, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
 	{
-		logMessage(LogLevel::Error, "Failed to set socket options", true);
+		Logger::error("Failed to set socket options", true);
 		return false;
 	}
 
 	// 3. Set socket to non-blocking mode
 	if (fcntl(listenFd_, F_SETFL, O_NONBLOCK) < 0)
 	{
-		logMessage(LogLevel::Error, "Failed to set socket to non-blocking", true);
+		Logger::error ("Failed to set socket to non-blocking", true);
 		return false;
 	}
 
@@ -82,14 +82,14 @@ bool Server::initSocket()
 
 	if (bind(listenFd_, (struct sockaddr*)&serverAddr_, sizeof(serverAddr_)) < 0)
 	{
-		logMessage(LogLevel::Error, "Failed to bind socket", true);
+		Logger::error("Failed to bind socket", true);
 		return false;
 	}
 
 	// 5. Begin listening for incoming connections
 	if (listen(listenFd_, SOMAXCONN) < 0)
 	{
-		logMessage(LogLevel::Error, "Failed to listen on socket", true);
+		Logger::error ("Failed to listen on socket", true);
 		return false;
 	}
 
@@ -112,7 +112,7 @@ void Server::pollLoop()
 	int ready = poll(pollFds_.data(), pollFds_.size(), 0);
 	if (ready < 0)
 	{
-		logMessage(LogLevel::Error, "Poll error");
+		Logger::error ("Poll error");
 		return ;
 	}
 

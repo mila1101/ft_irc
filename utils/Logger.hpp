@@ -6,7 +6,7 @@
 /*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 23:16:55 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/13 23:35:22 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/15 15:44:33 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ enum class LogLevel {
 class Logger
 {
 	public:
-		static void log (LogLevel level, const std::string& message, bool exitAfter = false);
+		static void logMessage (LogLevel level, const std::string& message, bool exitAfter = false);
 
 		static void info (const std::string& message);
 		static void warning (const std::string& message);
