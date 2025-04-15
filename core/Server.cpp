@@ -3,23 +3,27 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: msoklova <msoklova@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 16:05:10 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/13 23:05:09 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/15 15:59:49 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 #include "SocketHandler.hpp"
-#include "utils/Logger.hpp"
+
+void Server::logMessage(LogLevel level, const std::string& message, bool exitAfter)
+{
+	Logger::log(level, message, exitAfter);
+}
 
 Server::Server (int port, const std::string& password)
 	: port_(port), password_(password), listenFd_(-1), running_(false)
 {
 	if (!initSocket())
 		throw std::runtime_error("Failed to initialize server socket");
-	
+
 	setupPoll();
 
 	socketHandler_ = std::make_unique<SocketHandler>();
@@ -109,7 +113,7 @@ void Server::setupPoll()
 
 void Server::pollLoop()
 {
-	int ready = poll(pollFds_.data(), pollFds_.size(), 0);
+	int ready = poll(pollFds_.data(), pollFds_.size(), -1);
 	if (ready < 0)
 	{
 		logMessage(LogLevel::Error, "Poll error");

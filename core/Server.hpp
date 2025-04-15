@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: msoklova <msoklova@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 16:05:12 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/13 23:28:41 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/15 16:01:31 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,11 +16,12 @@
 #include <vector>
 #include <netinet/in.h> // sockaddr_in
 #include <poll.h> // poll
-#include <memory> 
+#include <memory>
 #include <stdexcept>
 #include <unistd.h>
 #include <arpa/inet.h> // inet_ntoa
 #include <fcntl.h> // fcntl
+#include "../utils/Logger.hpp"
 
 class SocketHandler;
 
@@ -34,7 +35,7 @@ class Server
         // Server lifecycle
         void run();
         void stop();
-        
+
     private:
         int port_;
         std::string password_;
@@ -48,9 +49,10 @@ class Server
 
         bool initSocket(); // Init server socket
         void setupPoll(); // Init pollFds
-        void pollLoop(); 
+        void pollLoop();
 
         void handleIncomingConnection(); // When event on server socket
         void handleClientMessage(int fd); // When event on client socket
+        void logMessage(LogLevel level, const std::string& message, bool exitAfter = false);
 
 };

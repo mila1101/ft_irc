@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SocketHandler.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: msoklova <msoklova@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 23:03:12 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/13 23:13:25 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/15 16:01:36 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,8 @@
 #include <netinet/in.h> // sockaddr_in
 #include <sys/socket.h>
 #include <fcntl.h>
+#include "../utils/Logger.hpp"
+#include <arpa/inet.h>
 
 class SocketHandler
 {
@@ -34,4 +36,6 @@ class SocketHandler
 	private:
 		void addClientSocket(int clientFd, std::vector<struct pollfd>& pollFds);
 		void disconnectClient(int clientFd, std::vector<struct pollfd>& pollFds);
+
+		std::vector<struct pollfd>* pollFds_;
 };

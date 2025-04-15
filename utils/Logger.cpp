@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Logger.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: msoklova <msoklova@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 23:30:17 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/13 23:36:03 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/15 15:29:15 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,4 +31,41 @@ void Logger::log (LogLevel level, const std::string& message, bool exitAfter)
 
 	std::string levelStr;
 	std::string color;
+
+	switch (level)
+	{
+		case LogLevel::Info:
+			levelStr = "[INFO]";
+			color = GREEN;
+			break;
+		case LogLevel::Error:
+			levelStr = "[ERROR]";
+			color = RED;
+			break;
+		case LogLevel::Warning:
+			levelStr = "[WARNING]";
+			color = YELLOW;
+			break;
+		case LogLevel::Connection:
+			levelStr = "[CONNECTION]";
+			color = CYAN;
+			break;
+		case LogLevel::Disconnection:
+			levelStr = "[DISCONNECTION]";
+			color = MAGENTA;
+			break;
+		case LogLevel::Privmsg:
+			levelStr = "[MESSAGE]";
+			color = BLUE;
+			break;
+		default:
+			levelStr = "[UNKNOWN]";
+			color = GRAY;
+			break;
+	}
+
+	std::cout << color << timeStream.str() << " " << levelStr << " " << message << RESET << std::endl;
+
+	if (exitAfter)
+		exit(1);
 }
