@@ -6,7 +6,7 @@
 /*   By: msoklova <msoklova@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 23:30:17 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/15 16:07:19 by msoklova         ###   ########.fr       */
+/*   Updated: 2025/04/15 16:12:22 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,12 @@ void Logger::logMessage (LogLevel level, const std::string& message, bool exitAf
 
 	if (exitAfter)
 		std::exit(1);
+}
+
+
+void Logger::log(LogLevel level, const std::string& message, bool exitAfter)
+{
+    logMessage(level, message, exitAfter);
 }
 
 void Logger::info (const std::string& message)
