@@ -6,13 +6,14 @@
 /*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 16:05:10 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/17 00:08:22 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/17 00:50:13 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 #include "SocketHandler.hpp"
 #include "../utils/Logger.hpp"
+#include "../commands/CommandDispatcher.hpp"
 
 Server* Server::instance_ = nullptr;  // init static singleton pointer
 
@@ -27,6 +28,9 @@ Server::Server (int port, const std::string& password)
 		throw std::runtime_error("Failed to initialize server socket");
 
 	setupPoll();
+
+	dispatcher_ = std::make_unique<CommandDispatcher>();
+    socketHandler_ = std::make_unique<SocketHandler>(pollFds_, *dispatcher_); 
 
 	socketHandler_ = std::make_unique<SocketHandler>(pollFds_);
 	Logger::info ("Server initialized on port " + std::to_string(port_));
