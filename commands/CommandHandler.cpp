@@ -1,44 +1,44 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   CommandDispatcher.cpp                              :+:      :+:    :+:   */
+/*   CommandHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:33:36 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/17 01:02:15 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/17 01:15:08 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "CommandDispatcher.hpp"
+#include "CommandHandler.hpp"
 #include "../utils/Logger.hpp"
 #include <iostream>
 #include <sys/socket.h> // for send()
 
-CommandDispatcher::CommandDispatcher()
+CommandHandler::CommandHandler()
 {
-    addCommand("NICK", &CommandDispatcher::cmdNick);
-    addCommand("USER", &CommandDispatcher::cmdUser);
-    addCommand("JOIN", &CommandDispatcher::cmdJoin);
-    addCommand("PRIVMSG", &CommandDispatcher::cmdMsg);
-    addCommand("QUIT", &CommandDispatcher::cmdQuit);
-    addCommand("PING", &CommandDispatcher::cmdPing);
-    addCommand("PONG", &CommandDispatcher::cmdPong);
-    addCommand("TOPIC", &CommandDispatcher::cmdTopic);
-    addCommand("KICK", &CommandDispatcher::cmdKick);
-    addCommand("INVITE", &CommandDispatcher::cmdInvite);
-    addCommand("MODE", &CommandDispatcher::cmdMode);
-    addCommand("PART", &CommandDispatcher::cmdPart);
+    addCommand("NICK", &CommandHandler::cmdNick);
+    addCommand("USER", &CommandHandler::cmdUser);
+    addCommand("JOIN", &CommandHandler::cmdJoin);
+    addCommand("PRIVMSG", &CommandHandler::cmdMsg);
+    addCommand("QUIT", &CommandHandler::cmdQuit);
+    addCommand("PING", &CommandHandler::cmdPing);
+    addCommand("PONG", &CommandHandler::cmdPong);
+    addCommand("TOPIC", &CommandHandler::cmdTopic);
+    addCommand("KICK", &CommandHandler::cmdKick);
+    addCommand("INVITE", &CommandHandler::cmdInvite);
+    addCommand("MODE", &CommandHandler::cmdMode);
+    addCommand("PART", &CommandHandler::cmdPart);
 }
 
-CommandDispatcher::~CommandDispatcher() {}
+CommandHandler::~CommandHandler() {}
 
-void CommandDispatcher::addCommand(const std::string& name, CommandHandler handler)
+void CommandHandler::addCommand(const std::string& name, CommandFunc handler)
 {
     commandTable[name] = std::bind(handler, this, std::placeholders::_1, std::placeholders::_2);
 }
 
-void CommandDispatcher::dispatch(int clientFd, const ParsedCommand& cmd)
+void CommandHandler::dispatch(int clientFd, const ParsedCommand& cmd)
 {
     if (cmd.command.empty()) {
         Logger::warning("Empty command received from fd=" + std::to_string(clientFd));
@@ -57,7 +57,7 @@ void CommandDispatcher::dispatch(int clientFd, const ParsedCommand& cmd)
 // To do by Siria : implement all command handlers
 
 // Example: NICK command handler
-void CommandDispatcher::cmdNick(int fd, const std::vector<std::string>& params)
+void CommandHandler::cmdNick(int fd, const std::vector<std::string>& params)
 {
     // Check if nickname was provided
     if (params.empty()) {
@@ -97,7 +97,7 @@ Use Logger::log(...) for colored, categorized logs (Info, Warning, Error, etc.)
 
 
 // To do
-void CommandDispatcher::cmdUser(int fd, const std::vector<std::string>& params)
+void CommandHandler::cmdUser(int fd, const std::vector<std::string>& params)
 {
 
 }

@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   CommandDispatcher.hpp                              :+:      :+:    :+:   */
+/*   CommandHandler.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:33:34 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/17 00:41:02 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/17 01:15:06 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,24 +18,23 @@
 #include <functional> 
 #include "../utils/InputParser.hpp" // for ParsedCommand
 
-class CommandDispatcher
+class CommandHandler
 {
 	public:
-		CommandDispatcher();
-		~CommandDispatcher();
+  		CommandHandler();
+    	~CommandHandler();
 
-		// 
 		void dispatch(int clientFd, const ParsedCommand& command);
 
 	private:
 		// command string -> handler function
-		typedef void (CommandDispatcher::*CommandHandler)(int, const std::vector<std::string>&);
-    	std::map<std::string, std::function<void(int, const std::vector<std::string>&)>> commandTable;
+    	typedef void (CommandHandler::*CommandFunc)(int, const std::vector<std::string>&);
+    	std::map<std::string, std::function<void(int, const std::vector<std::string>&)> > commandTable;
 
 		// add command
-		void addCommand(const std::string& name, CommandHandler handler);
+		 void addCommand(const std::string& name, CommandFunc handler);
 
-		// command handler (To do by Siria)
+		// command implementation (To do by Siria)
 		void cmdNick(int clientFd, const std::vector<std::string>& params);
 		void cmdUser(int clientFd, const std::vector<std::string>& params);
 		void cmdJoin(int clientFd, const std::vector<std::string>& params);

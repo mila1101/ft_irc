@@ -6,14 +6,14 @@
 /*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 23:03:14 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/17 00:46:55 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/17 01:12:00 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "SocketHandler.hpp"
 
-SocketHandler::SocketHandler(std::vector<struct pollfd>& pollFds, CommandDispatcher& dispatcher)
-    : pollFds_(pollFds), dispatcher_(dispatcher) {}
+SocketHandler::SocketHandler(std::vector<struct pollfd>& pollFds, CommandHandler& handler)
+    : pollFds_(pollFds), commandHandler_(handler) {}
 
 SocketHandler::~SocketHandler() {}
 
@@ -59,7 +59,7 @@ void SocketHandler::receiveMessage(int clientFd)
 	Logger::log(LogLevel::Privmsg, "Message from fd " + std::to_string(clientFd) + ": " + message);
 
 	ParsedCommand parsed = InputParser::parse(message);
-    dispatcher_.dispatch(clientFd, parsed);
+    commandHandler_.dispatch(clientFd, parsed);
 }
 
 void SocketHandler::addClientSocket(int clientFd)

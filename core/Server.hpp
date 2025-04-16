@@ -6,7 +6,7 @@
 /*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 16:05:12 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/17 00:58:32 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/17 01:12:57 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ class Server
         sockaddr_in serverAddr_;
         std::vector<struct pollfd> pollFds_;
 
-        std::unique_ptr<CommandDispatcher> dispatcher_;
+        std::unique_ptr<CommandHandler> commandHandler_;
         std::unique_ptr<SocketHandler> socketHandler_;
 
         bool initSocket(); // Init server socket

@@ -6,7 +6,7 @@
 /*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 23:03:12 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/17 00:45:10 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/17 01:10:06 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,13 +22,13 @@
 #include <sys/socket.h>
 #include <fcntl.h>
 #include "../utils/Logger.hpp"
-#include "../commands/CommandDispatcher.hpp"
+#include "../commands/CommandHandler.hpp"
 #include <arpa/inet.h>
 
 class SocketHandler
 {
 	public:
-		explicit SocketHandler(std::vector<struct pollfd>& pollFds, CommandDispatcher& dispatcher);
+		explicit SocketHandler(std::vector<struct pollfd>& pollFds, CommandHandler& dispatcher);
 		~SocketHandler();
 
 		void acceptConnection(int listenFd);
@@ -39,5 +39,5 @@ class SocketHandler
 		void disconnectClient(int clientFd);
 
 		std::vector<struct pollfd>& pollFds_; // Eunsu: better with reference that pointer
-		CommandDispatcher& dispatcher_;
+		CommandHandler& commandHandler_;
 };
