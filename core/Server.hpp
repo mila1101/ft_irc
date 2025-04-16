@@ -6,7 +6,7 @@
 /*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 16:05:12 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/15 17:05:31 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/17 00:06:32 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 #include <string>
 #include <vector>
+#include <csignal> // sigaction, sigemptyset
 #include <netinet/in.h> // sockaddr_in
 #include <poll.h> // poll
 #include <memory>
@@ -54,6 +55,11 @@ class Server
 
         void handleIncomingConnection(); // When event on server socket
         void handleClientMessage(int fd); // When event on client socket
+
+        // Signal handling  
+        void setupSignalHandler(); // Setup signal handler
+        static void handleSignal(int signal); // static handler
+        static Server* instance_; // Singleton pointer so that signal handler can access instance
 
         // Commad table variable
         using cmdFunction = void (Server::*)(int, const std::string&);

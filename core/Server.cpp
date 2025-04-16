@@ -6,7 +6,7 @@
 /*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 16:05:10 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/15 17:04:55 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/17 00:08:22 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,15 @@
 #include "SocketHandler.hpp"
 #include "../utils/Logger.hpp"
 
+Server* Server::instance_ = nullptr;  // init static singleton pointer
 
 Server::Server (int port, const std::string& password)
 	: port_(port), password_(password), listenFd_(-1), running_(false)
 {
+	instance_ = this; 
+
+	setupSignalHandler();
+	
 	if (!initSocket())
 		throw std::runtime_error("Failed to initialize server socket");
 
@@ -31,6 +36,26 @@ Server::~Server()
 {
 	if (listenFd_ != -1)
 		close(listenFd_);
+}
+
+void Server::setupSignalHandler()
+{
+	struct sigaction sa;
+	sa.sa_handler = Server::handleSignal;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+
+	sigaction(SIGINT, &sa, nullptr); // Handle Ctrl+C
+}
+
+void Server::handleSignal(int signal)
+{
+	if (signal == SIGINT)
+	{
+		Logger::info("Received SIGINT, stopping server...");
+		if (instance_)
+			instance_->stop();
+	}
 }
 
 void Server::run()
@@ -49,6 +74,18 @@ void Server::run()
 void Server::stop()
 {
 	running_ = false;
+
+	Logger::info("Cleaning up clients...");
+    for (size_t i = 0; i < pollFds_.size(); ++i)
+    {
+        int fd = pollFds_[i].fd;
+        if (fd != listenFd_)
+            close(fd);
+    }
+
+    pollFds_.clear();
+
+    Logger::info("All client connections closed.");
 }
 
 bool Server::initSocket()
