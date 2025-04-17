@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: smiranda <smiranda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:33:36 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/17 01:15:08 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/17 15:03:10 by smiranda         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,33 +57,53 @@ void CommandHandler::dispatch(int clientFd, const ParsedCommand& cmd)
 // To do by Siria : implement all command handlers
 
 // Example: NICK command handler
+// void CommandHandler::cmdNick(int fd, const std::vector<std::string>& params)
+// {
+//     // Check if nickname was provided
+//     if (params.empty()) {
+//         Logger::warning("NICK: no nickname provided from fd=" + std::to_string(fd));
+//         std::string err = "431 :No nickname given\r\n";
+//         send(fd, err.c_str(), err.length(), 0);  // Send error message to client
+//         return;
+//     }
+
+//     std::string newNick = params[0];
+
+//     // TODO: Check if nickname is already in use (via ClientManager)
+//     // if (clientManager.nickExists(newNick)) {
+//     //     std::string err = "433 " + newNick + " :Nickname is already in use\r\n";
+//     //     send(fd, err.c_str(), err.length(), 0);
+//     //     return;
+//     // }
+
+//     // TODO: Set nickname in ClientManager
+//     // clientManager.setNickname(fd, newNick);
+
+//     Logger::info("NICK command accepted: " + newNick + " (fd=" + std::to_string(fd) + ")");
+
+//     std::string msg = ":" + newNick + " NICK " + newNick + "\r\n";
+//     send(fd, msg.c_str(), msg.length(), 0);  // Send success response
+// }
+
 void CommandHandler::cmdNick(int fd, const std::vector<std::string>& params)
 {
-    // Check if nickname was provided
-    if (params.empty()) {
+    // Check if parameter is empty
+    if (params.empty())
+    {
         Logger::warning("NICK: no nickname provided from fd=" + std::to_string(fd));
         std::string err = "431 :No nickname given\r\n";
-        send(fd, err.c_str(), err.length(), 0);  // Send error message to client
+        send(fd, err.c_str(), err.length(), 0);
         return;
     }
-
+    std::regex pattern("^[a-zA-Z][a-zA-Z0-9\\-_]{0,8}$");
     std::string newNick = params[0];
+    if (!std::regex_match(newNick, pattern))
+    {
+        
+    }
 
-    // TODO: Check if nickname is already in use (via ClientManager)
-    // if (clientManager.nickExists(newNick)) {
-    //     std::string err = "433 " + newNick + " :Nickname is already in use\r\n";
-    //     send(fd, err.c_str(), err.length(), 0);
-    //     return;
-    // }
 
-    // TODO: Set nickname in ClientManager
-    // clientManager.setNickname(fd, newNick);
-
-    Logger::info("NICK command accepted: " + newNick + " (fd=" + std::to_string(fd) + ")");
-
-    std::string msg = ":" + newNick + " NICK " + newNick + "\r\n";
-    send(fd, msg.c_str(), msg.length(), 0);  // Send success response
-}
+} 
 
 /**
  * ✨ Tips for Siria
@@ -98,6 +118,56 @@ Use Logger::log(...) for colored, categorized logs (Info, Warning, Error, etc.)
 
 // To do
 void CommandHandler::cmdUser(int fd, const std::vector<std::string>& params)
+{
+
+}
+
+void CommandHandler::cmdJoin(int fd, const std::vector<std::string>& params)
+{
+
+}
+
+void CommandHandler::cmdMsg(int fd, const std::vector<std::string>& params)
+{
+
+}
+
+void CommandHandler::cmdQuit(int fd, const std::vector<std::string>& params)
+{
+
+}
+
+void CommandHandler::cmdPing(int fd, const std::vector<std::string>& params)
+{
+
+}
+
+void CommandHandler::cmdPong(int fd, const std::vector<std::string>& params)
+{
+
+}
+
+void CommandHandler::cmdTopic(int fd, const std::vector<std::string>& params)
+{
+
+}
+
+void CommandHandler::cmdKick(int fd, const std::vector<std::string>& params)
+{
+
+}
+
+void CommandHandler::cmdInvite(int fd, const std::vector<std::string>& params)
+{
+
+}
+
+void CommandHandler::cmdMode(int fd, const std::vector<std::string>& params)
+{
+
+}
+
+void CommandHandler::cmdPart(int fd, const std::vector<std::string>& params)
 {
 
 }
