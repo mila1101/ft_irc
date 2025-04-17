@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: smiranda <smiranda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 16:05:10 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/17 01:13:46 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/17 13:42:19 by smiranda         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -184,4 +184,16 @@ void Server::handleIncomingConnection()
 void Server::handleClientMessage(int clientFd)
 {
 	socketHandler_->receiveMessage(clientFd);
+}
+
+void Server::msgClient(int clientSocket, const std::string& msg)
+{
+	std::string endMsg = msg + "\r\n";
+	ssize_t bytes = send(clientSocket, endMsg.c_str(), endMsg.length(), 0);
+
+	if (bytes == -1)
+	{
+		std::cerr << "Failed to send message to client " \
+		<< clientSocket << ": " << strerror(errno) << std::endl;
+	}
 }

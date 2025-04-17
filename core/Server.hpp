@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: smiranda <smiranda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 16:05:12 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/17 01:12:57 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/17 13:42:26 by smiranda         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,11 +62,7 @@ class Server
         static void handleSignal(int signal); // static handler
         static Server* instance_; // Singleton pointer so that signal handler can access instance
 
-        // Commad table variable
-        // using cmdFunction = void (Server::*)(int, const std::string&);
-        // std::unordered_map<std::string, std::function<void(int, std::string const&)>> commandTable;
-
-        // Commands
-        // void addCommand(const std::string& name, cmdFunction handler);
-        // void commandInit();
+       // Send function
+       void Server::msgClient(int clientSocket, const std::string & msg);
+        
 };
