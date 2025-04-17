@@ -6,7 +6,7 @@
 /*   By: smiranda <smiranda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 16:05:12 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/17 13:42:26 by smiranda         ###   ########.fr       */
+/*   Updated: 2025/04/17 15:24:37 by smiranda         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 #include <arpa/inet.h> // inet_ntoa
 #include <fcntl.h> // fcntl
 #include <unordered_map> //for commands
+#include <sys/socket.h> // for send
 #include "../utils/Logger.hpp"
 
 class SocketHandler;
@@ -38,7 +39,10 @@ class Server
         void run();
         void stop();
 
-    private:
+        // Send function
+        void Server::msgClient(int clientSocket, const std::string & msg);
+    
+        private:
         int port_;
         std::string password_;
         int listenFd_;
@@ -61,8 +65,5 @@ class Server
         void setupSignalHandler(); // Setup signal handler
         static void handleSignal(int signal); // static handler
         static Server* instance_; // Singleton pointer so that signal handler can access instance
-
-       // Send function
-       void Server::msgClient(int clientSocket, const std::string & msg);
         
 };
