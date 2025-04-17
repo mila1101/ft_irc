@@ -6,7 +6,7 @@
 /*   By: smiranda <smiranda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:33:34 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/17 15:29:44 by smiranda         ###   ########.fr       */
+/*   Updated: 2025/04/17 19:08:10 by smiranda         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 class CommandHandler
 {
 	public:
+		//  agregar constructor de CommandHandler() para inicializar server_
   		CommandHandler();
     	~CommandHandler();
 
