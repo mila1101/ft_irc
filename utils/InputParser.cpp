@@ -6,7 +6,7 @@
 /*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:11:02 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/17 00:24:12 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/17 22:52:05 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,13 +22,37 @@ ParsedCommand InputParser::parse(const std::string& rawInput)
 	if (input.size() >= 2 && input.substr(input.size() - 2) == "\r\n")
 		input = input.substr(0, input.size() - 2);
 
-	// 2. if input is empty, return empty command
+	// 2. Skip empty/whitespace-only lines
 	if (input.find_first_not_of(" \t") == std::string::npos)
 		return result;
 
 	std::istringstream iss(input);
 	std::string word;
 	
-	// To DO
+	while (iss >> word)
+	{
+		// 3. Handle trailing param (starts with ":")
+		if (word[0] == ':') 
+		{
+			std::string trailing;
+			std::getline(iss, trailing);
+			word.erase(0, 1);
+			result.params.push_back(word + trailing);
+			break;
+		}
 
+		if (result.command.empty())
+		{
+			result.command = word;
+
+			// Convert command to uppercase
+			std::transform(result.command.begin(), result.command.end(), 
+				result.command.begin(), ::toupper);
+		}
+		else
+		{
+			result.params.push_back(word);
+		}
+	}
+	return result;
 }

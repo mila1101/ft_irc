@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smiranda <smiranda@student.42.fr>          +#+  +:+       +#+        */
+/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 16:05:10 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/17 13:42:19 by smiranda         ###   ########.fr       */
+/*   Updated: 2025/04/17 22:26:28 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,6 @@ Server::Server (int port, const std::string& password)
 	commandHandler_ = std::make_unique<CommandHandler>();
     socketHandler_ = std::make_unique<SocketHandler>(pollFds_, *commandHandler_);
 
-	socketHandler_ = std::make_unique<SocketHandler>(pollFds_);
 	Logger::info ("Server initialized on port " + std::to_string(port_));
 }
 
