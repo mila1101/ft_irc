@@ -3,15 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   CommandHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smiranda <smiranda@student.42.fr>          +#+  +:+       +#+        */
+/*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:33:36 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/17 19:06:52 by smiranda         ###   ########.fr       */
+/*   Updated: 2025/04/19 14:07:33 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CommandHandler.hpp"
 #include "../utils/Logger.hpp"
+#include "../client/Channel.hpp"
+#include "../client/Client.hpp"
 #include <iostream>
 
 CommandHandler::CommandHandler()
@@ -113,7 +115,7 @@ void CommandHandler::cmdNick(int clientFd, const std::vector<std::string>& param
         server_.msgClient(clientFd, ERR_ERRONEUSNICKNAME(server_.getIP(), newNick));
         return;
     }
-    
+
     for (const auto& pair : clients)
     {
         if (pair.second.getNickname() == newNick && pair.first != clientFd)
@@ -133,7 +135,7 @@ void CommandHandler::cmdNick(int clientFd, const std::vector<std::string>& param
             userMsg = ":" + oldNick + "!" + client.getUserName() + "@" + server_.getIP();
         else
             userMsg = ":" + server_.getIP() + " NICK :" + newNick + "\r\n";
-        
+
         client.setNickname(newNick);
 
         std::set<int> notifiedClients;
@@ -166,7 +168,7 @@ Use Logger::log(...) for colored, categorized logs (Info, Warning, Error, etc.)
  */
 
 
-// To do getters and setters 
+// To do getters and setters
 // getClients()
 // getNickname()
 // setUsername()
@@ -179,7 +181,7 @@ void CommandHandler::cmdUser(int fd, const std::vector<std::string>& params)
 
     if (clients.find(clientFd) == clients.end())
         return;
-    
+
     Client& client = clients[clientFd];
     if (client.isLoggedIn()) //tbd
     {
@@ -224,7 +226,7 @@ void CommandHandler::cmdMsg(int fd, const std::vector<std::string>& params)
 // isMember()
 // getMembers()
 // removeClientFromChannel() --> Remove user from the channel
-// removeClient() --> Close socket and cleanup 
+// removeClient() --> Close socket and cleanup
 
 void CommandHandler::cmdQuit(int fd, const std::vector<std::string>& params)
 {

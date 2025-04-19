@@ -6,9 +6,10 @@
 /*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 17:07:35 by msoklova          #+#    #+#             */
-/*   Updated: 2025/04/17 17:07:35 by msoklova         ###   ########.fr       */
+/*   Updated: 2025/04/19 13:49:59 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 #include "Client.hpp"
 
 Client::Client()
@@ -97,10 +98,10 @@ bool Client::needsPing() const
 	if (awaitingPong_) {
 		return false;
 	}
-	
+
 	auto now = std::chrono::system_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::seconds>(now - lastPong_).count();
-	return duration >= 120; 
+	return duration >= 120;
 }
 
 bool Client::hasTimedOut() const
@@ -108,8 +109,8 @@ bool Client::hasTimedOut() const
 	if (!awaitingPong_) {
 		return false;
 	}
-	
+
 	auto now = std::chrono::system_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::seconds>(now - lastPing_).count();
-	return duration >= 60; 
+	return duration >= 60;
 }
