@@ -6,7 +6,7 @@
 /*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 16:05:10 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/17 22:26:28 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/21 21:58:37 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,12 @@ Server::Server (int port, const std::string& password)
 	
 	if (!initSocket())
 		throw std::runtime_error("Failed to initialize server socket");
+
+	char hostBuffer[256];
+    if (gethostname(hostBuffer, sizeof(hostBuffer)) == 0)
+        serverIp_ = std::string(hostBuffer);
+    else
+        serverIp_ = "127.0.0.1"; // fallback for safety
 
 	setupPoll();
 
@@ -195,4 +201,54 @@ void Server::msgClient(int clientSocket, const std::string& msg)
 		std::cerr << "Failed to send message to client " \
 		<< clientSocket << ": " << strerror(errno) << std::endl;
 	}
+}
+
+std::string Server::getIP() const
+{
+	return serverIp_;
+}
+
+Client& Server::getClient(int fd)
+{
+	return clients_.at(fd);
+}
+
+std::map<int, Client>& Server::getClients()
+{
+	return clients_;
+}
+
+Channel& Server::getChannel(const std::string& name)
+{
+	return channels_.at(name);
+}
+std::map<std::string, Channel>& Server::getChannels()
+{
+	return channels_;
+}
+
+Channel& Server::getOrCreateChannel(const std::string& name)
+{
+	if (channels_.find(name) == channels_.end())
+	{
+		channels_[name] = Channel(name);
+	}
+	return channels_.at(name);
+}
+
+void Server::removeClient(int fd)
+{
+	clients_.erase(fd);
+}
+
+void Server::removeClientFromChannel(int fd, const std::string& channelName)
+{
+	std::map<std::string, Channel>::iterator it = channels_.find(channelName);
+	if (it != channels_.end())
+	{
+		it->second.removeMember(fd); // To check with Mila
+		if (it->second.isEmpty()) // To check with Mila
+			channels_.erase(it); // Remove channel if empty
+	}
+
 }

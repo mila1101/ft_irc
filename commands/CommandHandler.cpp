@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smiranda <smiranda@student.42.fr>          +#+  +:+       +#+        */
+/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:33:36 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/21 17:11:18 by msoklova         ###   ########.fr       */
+/*   Updated: 2025/04/21 22:10:23 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,45 +55,14 @@ void CommandHandler::dispatch(int clientFd, const ParsedCommand& cmd)
     }
 }
 
-// To do by Siria : implement all command handlers
-
-// Example: NICK command handler
-// void CommandHandler::cmdNick(int fd, const std::vector<std::string>& params)
-// {
-//     // Check if nickname was provided
-//     if (params.empty()) {
-//         Logger::warning("NICK: no nickname provided from fd=" + std::to_string(fd));
-//         std::string err = "431 :No nickname given\r\n";
-//         send(fd, err.c_str(), err.length(), 0);  // Send error message to client
-//         return;
-//     }
-
-//     std::string newNick = params[0];
-
-//     // TODO: Check if nickname is already in use (via ClientManager)
-//     // if (clientManager.nickExists(newNick)) {
-//     //     std::string err = "433 " + newNick + " :Nickname is already in use\r\n";
-//     //     send(fd, err.c_str(), err.length(), 0);
-//     //     return;
-//     // }
-
-//     // TODO: Set nickname in ClientManager
-//     // clientManager.setNickName(fd, newNick);
-
-//     Logger::info("NICK command accepted: " + newNick + " (fd=" + std::to_string(fd) + ")");
-
-//     std::string msg = ":" + newNick + " NICK " + newNick + "\r\n";
-//     send(fd, msg.c_str(), msg.length(), 0);  // Send success response
-// }
-
 
 // To do:
-// getClients()
-// getChannels()
-// getIP()
+// getClients() done
+// getChannels()done
+// getIP() done
 // getNickName()
 // setNickName()
-// getMembers()
+// getMembers() 
 // isMember()
 // isLoggedIn()
 void CommandHandler::cmdNick(int clientFd, const std::vector<std::string>& params)
@@ -504,5 +473,57 @@ void CommandHandler::cmdMode(int fd, const std::vector<std::string>& params)
 
 void CommandHandler::cmdPart(int fd, const std::vector<std::string>& params)
 {
+    if (params.empty())
+    {
+        server_.msgClient(fd, ERR_NEEDMOREPARAMS(server_.getIP(), "PART"));
+        Logger::warning("PART: No parameters provided by fd=" + std::to_string(fd));
+        return;
+    }
 
+    std::string channelName = params[0];
+    if (channelName[0] != '#')
+        channelName = "#" + channelName;
+    
+    std::map<std::string, Channel>& channels = server_.getChannels();
+    std::map<std::string, Channel>::iterator it = channels.find(channelName);
+
+    if (it == channels.end())
+    {
+        server_.msgClient(fd, ERR_NOSUCHCHANNEL(server_.getIP(), channelName));
+        return;
+    }
+
+    Channel& channel = it->second;
+    if (!channel.isMember(fd))
+    {
+        server_.msgClient(fd, ERR_NOTONCHANNEL(server_.getIP(), channelName));
+        return;
+    }
+
+    // Optional part message
+    std::string partMsg = (params.size() > 1) ? params[1] : "";
+    for (size_t i = 2; i < params.size(); ++i)
+    {
+       partMsg += " " + params[i];
+    }
+    if (!partMsg.empty() && partMsg[0] == ':')
+        partMsg = partMsg.substr(1);
+
+    const Client& client = server_.getClient(fd);
+    std::string fullMsg = ":" + client.getNickName() + "!" + client.getUserName() + "@localhost PART " + channelName;
+    if (!partMsg.empty())
+        fullMsg += " :" + partMsg;
+    fullMsg += "\r\n";
+
+    // Notify all members
+    const std::set<int>& members = channel.getMembers();
+    for (std::set<int>::const_iterator it = members.begin(); it != members.end(); ++it)
+    {
+        server_.msgClient(*it, fullMsg);
+    }
+
+    Logger::info("Client " + client.getNickName() + " parted from " + channelName + (partMsg.empty() ? "" : " (" + partMsg + ")"));
+
+    // Remove user from channel
+    server_.removeClientFromChannel(fd, channelName);
 }

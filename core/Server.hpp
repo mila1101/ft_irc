@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smiranda <smiranda@student.42.fr>          +#+  +:+       +#+        */
+/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 16:05:12 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/17 15:24:37 by smiranda         ###   ########.fr       */
+/*   Updated: 2025/04/21 21:50:41 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,9 +24,14 @@
 #include <fcntl.h> // fcntl
 #include <unordered_map> //for commands
 #include <sys/socket.h> // for send
+#include <map>
+
 #include "../utils/Logger.hpp"
+#include "../client/Client.hpp"
+#include "../client/Channel.hpp"
 
 class SocketHandler;
+class CommandHandler;
 
 class Server
 {
@@ -39,25 +44,45 @@ class Server
         void run();
         void stop();
 
-        // Send function
+        // Send to client
         void Server::msgClient(int clientSocket, const std::string & msg);
-    
-        private:
+
+        // Getters
+        std::string getIP() const;
+
+        Client& getClient(int fd);
+        std::map<int, Client>& getClients();
+
+        Channel& getChannel(const std::string& name);
+        std::map<std::string, Channel>& getChannels();
+        Channel& getOrCreateChannel(const std::string& name);
+
+        // Client / Channel management
+        void removeClient(int fd);
+        void removeClientFromChannel(int fd, const std::string& channelName);  
+
+    private:
+        // Network state
         int port_;
         std::string password_;
         int listenFd_;
         bool running_;
-
         sockaddr_in serverAddr_;
         std::vector<struct pollfd> pollFds_;
 
+        // Server logic
         std::unique_ptr<CommandHandler> commandHandler_;
         std::unique_ptr<SocketHandler> socketHandler_;
 
+        // Core data
+        std::string serverIp_;
+        std::map<int, Client> clients_;
+        std::map<std::string, Channel> channels_;
+        
+        // Internal helpers
         bool initSocket(); // Init server socket
         void setupPoll(); // Init pollFds
         void pollLoop();
-
         void handleIncomingConnection(); // When event on server socket
         void handleClientMessage(int fd); // When event on client socket
 
@@ -65,5 +90,4 @@ class Server
         void setupSignalHandler(); // Setup signal handler
         static void handleSignal(int signal); // static handler
         static Server* instance_; // Singleton pointer so that signal handler can access instance
-        
 };
