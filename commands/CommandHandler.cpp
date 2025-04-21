@@ -6,7 +6,7 @@
 /*   By: smiranda <smiranda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:33:36 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/21 19:14:35 by smiranda         ###   ########.fr       */
+/*   Updated: 2025/04/21 17:11:18 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,7 +183,7 @@ void CommandHandler::cmdUser(int fd, const std::vector<std::string>& params)
         return;
 
     Client& client = clients[clientFd];
-    if (client.isLoggedIn()) //tbd
+    if (client.isRegistered()) //tbd
     {
         server_.msgClient(clientFd, ERR_ALREADYREGISTRED(client.getNickName()));
         return;
@@ -203,7 +203,7 @@ void CommandHandler::cmdUser(int fd, const std::vector<std::string>& params)
 
     if (!client.getNickname().empty())
     {
-        client.setLoggedIn(true);
+        client.setRegistered(true);
         server_.sendWelcome(clientFd, client); //tbd
     }
 }
