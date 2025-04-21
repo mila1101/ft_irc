@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
+/*   By: smiranda <smiranda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:33:36 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/21 15:14:47 by msoklova         ###   ########.fr       */
+/*   Updated: 2025/04/21 16:57:09 by smiranda         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include "../client/Client.hpp"
 #include <iostream>
 
-CommandHandler::CommandHandler()
+CommandHandler::CommandHandler(Server &server, std::map<int, Client>& clients) : server_(server), clients_(clients)
 {
     addCommand("NICK", &CommandHandler::cmdNick);
     addCommand("USER", &CommandHandler::cmdUser);
@@ -78,7 +78,7 @@ void CommandHandler::dispatch(int clientFd, const ParsedCommand& cmd)
 //     // }
 
 //     // TODO: Set nickname in ClientManager
-//     // clientManager.setNickname(fd, newNick);
+//     // clientManager.setNickName(fd, newNick);
 
 //     Logger::info("NICK command accepted: " + newNick + " (fd=" + std::to_string(fd) + ")");
 
@@ -91,8 +91,8 @@ void CommandHandler::dispatch(int clientFd, const ParsedCommand& cmd)
 // getClients()
 // getChannels()
 // getIP()
-// getNickname()
-// setNickname()
+// getNickName()
+// setNickName()
 // getMembers()
 // isMember()
 // isLoggedIn()
@@ -170,9 +170,9 @@ Use Logger::log(...) for colored, categorized logs (Info, Warning, Error, etc.)
 
 // To do getters and setters
 // getClients()
-// getNickname()
-// setUsername()
-// setRealname()
+// getNickName()
+// setUserName()
+// setRealName()
 // setLoggedIn()
 // sendWelcome()
 void CommandHandler::cmdUser(int fd, const std::vector<std::string>& params)
@@ -185,23 +185,23 @@ void CommandHandler::cmdUser(int fd, const std::vector<std::string>& params)
     Client& client = clients[clientFd];
     if (client.isLoggedIn()) //tbd
     {
-        server_.msgClient(clientFd, ERR_ALREADYREGISTRED(client.getNickname()));
+        server_.msgClient(clientFd, ERR_ALREADYREGISTRED(client.getNickName()));
         return;
     }
 
     if (params.size() < 4)
     {
-        server_.msgClient(clientFd, ERR_NEEDMOREPARAMS(client.getNickname(), "USER"));
+        server_.msgClient(clientFd, ERR_NEEDMOREPARAMS(client.getNickName(), "USER"));
         return;
     }
     std::string username = params[0];
     std::string realname = params[3];
     if (!realname.empty() && realname[0] == ':')
         realname = realname.substr(1);
-    client.setUserName(username);
-    client.setRealName(realname);
+    client.setUsername(username);
+    client.setRealname(realname);
 
-    if (!client.getNickName().empty())
+    if (!client.getNickname().empty())
     {
         client.setLoggedIn(true);
         server_.sendWelcome(clientFd, client); //tbd
@@ -210,7 +210,25 @@ void CommandHandler::cmdUser(int fd, const std::vector<std::string>& params)
 
 void CommandHandler::cmdJoin(int fd, const std::vector<std::string>& params)
 {
+    if (params.empty())
+    {
+        server_.msgClient(fd, ERR_NEEDMOREPARAMS(server_.getServerName(), "JOIN"));
+        return;
+    }
+    const std::string& channelName = params[0];
+    
+    if (channelName.empty() || channelName[0] != '#')
+    {
+        server_.msgClient(fd, ERR_NOSUCHCHANEL(server_.getServerName(), channelName));
+        return;
+    }
 
+    Client& client = server_.getClient(fd);
+    Channel& channel = server_.getOrCreateChannel(channelName);
+    if (!channel.isMember(fd))
+        channel.addMember(fd);
+    
+    std::string joinMsg = ":" + client.getNickName() + "!" + client.
 }
 
 void CommandHandler::cmdMsg(int fd, const std::vector<std::string>& params)
@@ -220,8 +238,8 @@ void CommandHandler::cmdMsg(int fd, const std::vector<std::string>& params)
 
 // To do:
 // getClient()
-// getNickname()
-// getUsername()
+// getNickName()
+// getUserName()
 // getChannels()
 // isMember()
 // getMembers()
@@ -232,7 +250,7 @@ void CommandHandler::cmdQuit(int fd, const std::vector<std::string>& params)
 {
     Client& client = server_.getClient(fd);
     std::string quitMsg = (params.empty()) ? "Client Quit" : params[0];
-    std::string fullQuitMsg = ":" + client.getNickName() + "!" + client.getUsername() + "@localhost QUIT :" + quitMsg + "\r\n";
+    std::string fullQuitMsg = ":" + client.getNickName() + "!" + client.getUserName() + "@localhost QUIT :" + quitMsg + "\r\n";
 
     std::set<int> notifiedClients;
     for (const auto& channelPair : server_.getChannels())
