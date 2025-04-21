@@ -6,7 +6,7 @@
 /*   By: smiranda <smiranda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:33:36 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/21 16:57:09 by smiranda         ###   ########.fr       */
+/*   Updated: 2025/04/21 18:54:56 by smiranda         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -210,30 +210,147 @@ void CommandHandler::cmdUser(int fd, const std::vector<std::string>& params)
 
 void CommandHandler::cmdJoin(int fd, const std::vector<std::string>& params)
 {
-    if (params.empty())
+    if (params.empty() || params[0] == ":")
     {
         server_.msgClient(fd, ERR_NEEDMOREPARAMS(server_.getServerName(), "JOIN"));
         return;
     }
-    const std::string& channelName = params[0];
+    std::string channelName = params[0];
+    std::string password = (params.size() > 1) ? params[1] : "";
+
+    if (channelName[0] != '#')
+        channelName = "#" + channelName;
     
-    if (channelName.empty() || channelName[0] != '#')
+    //Create channel
+    if (server_.getChannels().find(channelName) == server_.getChannels().end())
     {
-        server_.msgClient(fd, ERR_NOSUCHCHANEL(server_.getServerName(), channelName));
+        server_.getChannels().emplace(channelName, Channel(channelName));
+        Logger::info("Channel " + channelName + " created by " + server_.getClient(fd).getNickName());
+    }
+
+    Channel& channel = server_.getChannels()[channelName];
+    bool isFirstMember = channel.getMembers().empty();
+
+    // Restrictions
+    if (!channel.getPassword().empty() && password != channel.getPassword())
+    {
+        server_.msgClient(fd, ERR_BADCHANNELKEY(server_.getIP(), channelName));
+        return;
+    }
+    if (channel.isInviteOnly() && !channel.isInvited(fd))
+    {
+        server_.msgClient(fd, ERR_INVITEONLYCHAN(server_.getIP(), channelName));
+        return;
+    }
+    if (channel.isFull())
+    {
+        server_.msgClient(fd, ERR_CHANNELISFULL(server_.getIP(), channelName));
         return;
     }
 
-    Client& client = server_.getClient(fd);
-    Channel& channel = server_.getOrCreateChannel(channelName);
-    if (!channel.isMember(fd))
-        channel.addMember(fd);
-    
-    std::string joinMsg = ":" + client.getNickName() + "!" + client.
+    channel.addMember(fd);
+    std::string joinMsg = RPL_JOIN(server_.getIP(), server_.getClient(fd).getNickName(), channelName);
+    for (int memberFd : channel.getMembers())
+        server_.msgClient(memberFd, joinMsg);
+    if (isFirstMember)
+    {
+        channel.addOperator(fd);
+        server_.msgClient(fd, RPL_SERVERMODE(server_.getIP(), channelName, "+o", server_.getClient(fd).getNickName()));
+        server_.msgClient(fd, RPL_YOUROP);
+    }
+
+    if (channel.getTopic().empty())
+        server_.msgClient(fd, RPL_NOTOPIC(server_.getIP(), server_.getClient(fd).getNickName(), channelName));
+    else
+        server_.msgClient(fd, RPL_TOPIC(server_.getIP(), server_.getClient(fd).getNickName(), channelName, channel.getTopic()));
+    Logger::info("Client " + server_.getClient(fd).getNickname() + " joined channel " + channelName);
 }
 
 void CommandHandler::cmdMsg(int fd, const std::vector<std::string>& params)
 {
+    if (params.size() <2)
+    {
+        server_.msgClient(fd, ERR_NEEDMOREPARAMS(server_.getIP(), "PRIVMSG"));
+        Logger::warning("PRIVMSG: Not enough parameters from fd=" + std::to_string(fd));
+        return;
+    }
+    std::string recipient = params[0];
+    std::string message;
+    
+    for (size_t i = 1; i < params.size(); ++i)
+    {
+        message += params[i];
+        if (i != params.size() - 1)
+            message += " ";
+    }
 
+    if (!message.empty() && message[0] == ':')
+        message = message.substr(1);
+    if (message.empty())
+    {
+        server_.msgClient(fd, ERR_NOTEXTTOSEND(server_.getIP()));
+        return;
+    }
+
+    const std::string& senderNick = server_.getClient(fd).getNickName();
+
+    if (!recipient.empty() && recipient[0] == '#')
+    {
+        std::map<std::string, Channel>& channels = server_.getChannels();
+        std::map<std::string, Channel>::iterator it = channels.find(recipient);
+        if (it == channels.end())
+        {
+            server_.msgClient(fd, ERR_NOSUCHCHANNEL(server_.getIP(), recipient));
+            return;
+        }
+        Channel& channel = it->second;
+        if (!channel.isMember(fd))
+        {
+            server_.msgClient(fd, ERR_CANNOTSENDTOCHAN(server_.getIP(), recipient));
+            return;
+        }
+        if (server_.getBot() && !message.empty() && message[0] == '!')
+        {
+            Logger::info("Bot called by " + senderNick + " in channel " + recipient);
+            server_.getBot()->executeCommand(server_, fd, recipient, message.substr(1));
+            return;
+        }
+        std::string privmsg = RPL_PRIVMSG(server_.getIP(), senderNick, recipient, message);
+        const std::set<int>& members = channel.getMembers();
+        for (std::set<int>::const_iterator it = members.begin(); it != members.end(); ++it)
+        {
+            if (*it != fd)
+                server_.msgClient(*it, privmsg);
+        }
+        //Log message
+        // std::ostringstream oss;
+        // oss << "Message sent on channel [" << recipient << "] Users in channel: [";
+
+        // bool first = true;
+        // for (int memberSocket : channel.getMembers())
+        // {
+        //     if (!first) oss << ", ";
+        //     oss << server_.getClient(memberSocket).getNickName();
+        //     first = false;
+        // }
+        // oss << "]";
+
+        // Logger::log(LogLevel::Channel, oss.str());
+        
+        Logger::info("Message sent from " + senderNick + " to channel " + recipient + ": " + message);
+    }
+    else
+    {
+        int targetFd = server_.getClientFdByNickName(recipient);
+        if (targetFd == -1)
+        {
+            server_.msgClient(fd, ERR_NOSUCHNICK(server_.getIP(), recipient));
+            return;
+        }
+        std::string privmsg = RPL_PRIVMSGFORMAT(senderNick, recipient, message);
+        server_.msgClient(targetFd, privmsg);
+        Logger::log(LogLevel::Privmsg, "Message sent from " + senderNick + " to " + recipient);
+    }
 }
 
 // To do:

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Macros.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
+/*   By: smiranda <smiranda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 14:12:09 by smiranda          #+#    #+#             */
-/*   Updated: 2025/04/21 15:36:28 by msoklova         ###   ########.fr       */
+/*   Updated: 2025/04/21 18:57:47 by smiranda         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,3 +40,14 @@
 #define ERR_CHANOPRIVISNEEDED(server, channel) (":" + server + " 482 " + channel + " :You're not channel operator")
 #define ERR_UMODEUNKNOWNFLAG(server) (":" + server + " 501 :Unknown MODE flag")
 #define ERR_NOORIGIN(server) (":" + server + " 409 :No origin specified")
+#define ERR_NOTEXTTOSEND(server) (":" + server + " 412 :No text to send")
+#define ERR_NOSUCHCHANNEL(server, channel) (":" + server + " 403 " + channel + " :No such channel")
+
+//Messaging
+#define RPL_JOIN(server, nick, channel) (":" + nick + "!" + nick + "@" + server + " JOIN " + channel)
+#define RPL_NOTOPIC(server, nick, channel) (":" + server + " 331 " + nick + " " + channel + " :No topic is set")
+#define RPL_SERVERMODE(server, channel, mode, nick) (":" + server + " MODE " + channel + " " + mode + " " + nick)
+#define RPL_YOUROP "You're now channel operator"
+#define TOPIC(server, nick, channel, topic) (":" + server + " 332 " + nick + " " + channel + " :" + topic)
+#define RPL_PRIVMSG(server, sender, recipient, message) (":" + sender + "!" + sender + "@" + server + " PRIVMSG " + recipient + " :" + message)
+#define RPL_PRIVMSGFORMAT(sender, recipient, message) (":" + sender + " PRIVMSG " + recipient + " :" + message)
