@@ -6,7 +6,7 @@
 /*   By: smiranda <smiranda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:33:36 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/21 16:55:33 by smiranda         ###   ########.fr       */
+/*   Updated: 2025/04/21 16:57:09 by smiranda         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -250,7 +250,7 @@ void CommandHandler::cmdQuit(int fd, const std::vector<std::string>& params)
 {
     Client& client = server_.getClient(fd);
     std::string quitMsg = (params.empty()) ? "Client Quit" : params[0];
-    std::string fullQuitMsg = ":" + client.getNickName() + "!" + client.getUsername() + "@localhost QUIT :" + quitMsg + "\r\n";
+    std::string fullQuitMsg = ":" + client.getNickName() + "!" + client.getUserName() + "@localhost QUIT :" + quitMsg + "\r\n";
 
     std::set<int> notifiedClients;
     for (const auto& channelPair : server_.getChannels())
