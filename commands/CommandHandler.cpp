@@ -6,7 +6,7 @@
 /*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:33:36 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/21 15:14:47 by msoklova         ###   ########.fr       */
+/*   Updated: 2025/04/21 17:11:18 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,15 +183,15 @@ void CommandHandler::cmdUser(int fd, const std::vector<std::string>& params)
         return;
 
     Client& client = clients[clientFd];
-    if (client.isLoggedIn()) //tbd
+    if (client.isRegistered()) //tbd
     {
-        server_.msgClient(clientFd, ERR_ALREADYREGISTRED(client.getNickname()));
+        server_.msgClient(clientFd, ERR_ALREADYREGISTRED(client.getNickName()));
         return;
     }
 
     if (params.size() < 4)
     {
-        server_.msgClient(clientFd, ERR_NEEDMOREPARAMS(client.getNickname(), "USER"));
+        server_.msgClient(clientFd, ERR_NEEDMOREPARAMS(client.getNickName(), "USER"));
         return;
     }
     std::string username = params[0];
@@ -203,7 +203,7 @@ void CommandHandler::cmdUser(int fd, const std::vector<std::string>& params)
 
     if (!client.getNickName().empty())
     {
-        client.setLoggedIn(true);
+        client.setRegistered(true);
         server_.sendWelcome(clientFd, client); //tbd
     }
 }
@@ -232,7 +232,7 @@ void CommandHandler::cmdQuit(int fd, const std::vector<std::string>& params)
 {
     Client& client = server_.getClient(fd);
     std::string quitMsg = (params.empty()) ? "Client Quit" : params[0];
-    std::string fullQuitMsg = ":" + client.getNickName() + "!" + client.getUsername() + "@localhost QUIT :" + quitMsg + "\r\n";
+    std::string fullQuitMsg = ":" + client.getNickName() + "!" + client.getUserName() + "@localhost QUIT :" + quitMsg + "\r\n";
 
     std::set<int> notifiedClients;
     for (const auto& channelPair : server_.getChannels())
