@@ -6,7 +6,7 @@
 /*   By: smiranda <smiranda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:33:34 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/17 19:08:10 by smiranda         ###   ########.fr       */
+/*   Updated: 2025/04/18 12:32:01 by smiranda         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,18 +20,20 @@
 #include "../utils/InputParser.hpp" // for ParsedCommand
 #include "../utils/Macros.hpp" // for error messages
 #include "../core/Server.hpp" // communication with client
+#include "../client/Client.hpp"
+
 
 class CommandHandler
 {
 	public:
-		//  agregar constructor de CommandHandler() para inicializar server_
-  		CommandHandler();
+  		CommandHandler(Server &server, std::map<int, Client>& clients);
     	~CommandHandler();
 
 		void dispatch(int clientFd, const ParsedCommand& command);
 
 	private:
 		Server& server_;
+		std::map<int, Client>& clients_;
 		// command string -> handler function
     	typedef void (CommandHandler::*CommandFunc)(int, const std::vector<std::string>&);
     	std::map<std::string, std::function<void(int, const std::vector<std::string>&)> > commandTable;
