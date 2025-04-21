@@ -6,7 +6,7 @@
 /*   By: smiranda <smiranda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 14:12:09 by smiranda          #+#    #+#             */
-/*   Updated: 2025/04/21 18:57:47 by smiranda         ###   ########.fr       */
+/*   Updated: 2025/04/21 19:00:25 by smiranda         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,6 @@
 #define RPL_NOTOPIC(server, nick, channel) (":" + server + " 331 " + nick + " " + channel + " :No topic is set")
 #define RPL_SERVERMODE(server, channel, mode, nick) (":" + server + " MODE " + channel + " " + mode + " " + nick)
 #define RPL_YOUROP "You're now channel operator"
-#define TOPIC(server, nick, channel, topic) (":" + server + " 332 " + nick + " " + channel + " :" + topic)
+#define RPL_TOPIC(server, nick, channel, topic) (":" + server + " 332 " + nick + " " + channel + " :" + topic)
 #define RPL_PRIVMSG(server, sender, recipient, message) (":" + sender + "!" + sender + "@" + server + " PRIVMSG " + recipient + " :" + message)
 #define RPL_PRIVMSGFORMAT(sender, recipient, message) (":" + sender + " PRIVMSG " + recipient + " :" + message)

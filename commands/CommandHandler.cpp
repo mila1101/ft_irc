@@ -6,7 +6,7 @@
 /*   By: smiranda <smiranda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:33:36 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/21 18:54:56 by smiranda         ###   ########.fr       */
+/*   Updated: 2025/04/21 19:14:35 by smiranda         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -423,7 +423,68 @@ void CommandHandler::cmdPong(int fd, const std::vector<std::string>& params)
 
 void CommandHandler::cmdTopic(int fd, const std::vector<std::string>& params)
 {
+    if (params.empty())
+    {
+        server_.msgClient(fd, ERR_NEEDMOREPARAMS(server_.getIP(), "TOPIC"));
+        Logger::warning("TOPIC: Not enough parameters from fd=" + std::to_string(fd));
+        return;
+    }
 
+    const std::string& channelName = params[0];
+    std::string topic;
+
+    if (params.size() > 1)
+    {
+        for (size_t i = 1; i < params.size(); ++i)
+        {
+            topic += params[i];
+            if (i != params.size() - 1)
+                topic += " ";
+        }
+        if (!topic.empty() && topic[0] == ':')
+            topic = topic.substr(1);
+    }
+    std::map<std::string, Channel>& channels = server_.getChannels();
+    std::map<std::string, Channel>::iterator it = channels.find(channelName);
+    if (it == channels.end())
+    {
+        server_.msgClient(fd, ERR_NOSUCHCHANNEL(server_.getIP(), channelName));
+        return;
+    }
+
+    Channel& channel = it->second;
+    if (!channel.isMember(fd))
+    {
+        server_.msgClient(fd, ERR_NOTONCHANNEL(server_.getIP(), channelName));
+        return;
+    }
+
+    const std::string& nick = server_.getClient(fd).getNickName();
+
+    if (topic.empty())
+    {
+        const std::string& currentTopic = channel.getTopic();
+        if (currentTopic.empty())
+            server_.msgClient(fd, RPL_NOTOPIC(server_.getIP(), nick, channelName));
+        else
+            server_.msgClient(fd, RPL_TOPIC(server_.getIP(), nick, channelName, currentTopic));
+    }
+
+    if (channel.isTopicRestricted() && !channel.isOperator(fd))
+    {
+        server_.msgClient(fd, ERR_CHANOPRIVISNEEDED(server_.getIP(), channelName));
+        return;
+    }
+
+    channel.setTopic(topic);
+    std::string topicMsg = RPL_TOPIC(server_.getIP(), nick, channelName, topic);
+
+    const std::set<int>& members = channel.getMembers();
+    for (std::set<int>::const_iterator it = members.begin(); it != members.end(); ++it)
+    {
+        server_.msgClient(*it, topicMsg);
+    }
+    Logger::info("Topic set to '" + topic + "' for channel " + channelName + " by " + nick);
 }
 
 void CommandHandler::cmdKick(int fd, const std::vector<std::string>& params)
