@@ -6,7 +6,7 @@
 /*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:33:36 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/21 22:10:23 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/21 22:35:42 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -468,7 +468,91 @@ void CommandHandler::cmdInvite(int fd, const std::vector<std::string>& params)
 
 void CommandHandler::cmdMode(int fd, const std::vector<std::string>& params)
 {
+    if (params.empty())
+    {
+        server_.msgClient(fd, ERR_NEEDMOREPARAMS(server_.getIP(), "MODE"));
+        Logger::warning("MODE: Not enough parameters from fd=" + std::to_string(fd));
+        return;
+    }
 
+    std::string channelName = params[0];
+    if (channelName[0] != '#')
+        channelName = "#" + channelName;
+
+    std::map<std::string, Channel>& channels = server_.getChannels();
+    std::map<std::string, Channel>::iterator it = channels.find(channelName);
+    if (it == channels.end()) {
+        server_.msgClient(fd, ERR_NOSUCHCHANNEL(server_.getIP(), channelName));
+        return;
+    }
+
+    Channel& channel = it->second;
+    if (!channel.isMember(fd)) {
+        server_.msgClient(fd, ERR_NOTONCHANNEL(server_.getIP(), channelName));
+        return;
+    }
+
+    if (params.size() < 2) {
+
+    std::string modes;
+    if (channel.isInviteOnly()) modes += "i";
+    if (channel.isTopicRestriction()) modes += "t";
+    if (channel.hasPassword()) modes += "k";
+    if (channel.hasUserLimit()) modes += "l";
+
+    std::string reply = ":" + server_.getIP() + " 324 " + server_.getClient(fd).getNickName()
+                          + " " + channelName + " +" + modes + "\r\n";
+    server_.msgClient(fd, reply);
+    return;
+    }
+    const std::string& modeStr = params[1];
+    bool adding = true;
+    size_t paramIndex = 2;
+
+    for (size_t i = 0; i < modeStr.size(); ++i)
+    {
+        char c = modeStr[i];
+        if (c == '+') { adding = true; continue; }
+        if (c == '-') { adding = false; continue; }
+
+        switch (c)
+        {
+            case 'i':
+                channel.setInviteOnly(adding);
+                break;
+            case 't':
+                channel.setTopicRestriction(adding); // To Do in Channel.hpp
+                break;
+            case 'k':
+                if (adding) {
+                    if (paramIndex >= params.size()) {
+                        server_.msgClient(fd, ERR_NEEDMOREPARAMS(server_.getIP(), "MODE +k"));
+                        return;
+                    }
+                    channel.setPassword(params[paramIndex++]);
+                } else {
+                    channel.setPassword("");
+                }
+                break;
+            case 'l':
+                if (adding) {
+                    if (paramIndex >= params.size()) {
+                        server_.msgClient(fd, ERR_NEEDMOREPARAMS(server_.getIP(), "MODE +l"));
+                        return;
+                    }
+                    channel.setUserLimit(std::atoi(params[paramIndex++].c_str()));
+                } else {
+                    channel.setUserLimit(-1); // no limit
+                }
+                break;
+            default:
+                server_.msgClient(fd, ERR_UNKNOWNMODE(server_.getIP(), std::string(1, c), channelName));
+                Logger::warning("MODE: Unknown mode '" + std::string(1, c) + "' from fd=" + std::to_string(fd));
+                return;
+        }
+    }
+
+    Logger::info("Client " + server_.getClient(fd).getNickName() + " changed mode of " + channelName + " to " + modeStr);
 }
 
 void CommandHandler::cmdPart(int fd, const std::vector<std::string>& params)
@@ -476,7 +560,7 @@ void CommandHandler::cmdPart(int fd, const std::vector<std::string>& params)
     if (params.empty())
     {
         server_.msgClient(fd, ERR_NEEDMOREPARAMS(server_.getIP(), "PART"));
-        Logger::warning("PART: No parameters provided by fd=" + std::to_string(fd));
+        Logger::warning("PART: Not enough parameters from fd=" + std::to_string(fd));
         return;
     }
 

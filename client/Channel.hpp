@@ -52,7 +52,7 @@ class Channel {
 		void setInviteOnly(bool value) { inviteOnly_ = value; }
 
 		bool isTopicRestriction() const { return topicRestriction_; }
-		void setTopicRestriction_(bool value) { topicRestriction_ = value; }
+		void setTopicRestriction(bool value) { topicRestriction_ = value; }
 
 		const std::string &getPassword() const { return password_; }
 		void setPassword(const std::string &pass) { password_ = pass; }
