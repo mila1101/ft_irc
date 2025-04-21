@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Macros.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smiranda <smiranda@student.42.fr>          +#+  +:+       +#+        */
+/*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 14:12:09 by smiranda          #+#    #+#             */
-/*   Updated: 2025/04/17 15:01:43 by smiranda         ###   ########.fr       */
+/*   Updated: 2025/04/21 15:36:28 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,3 +39,4 @@
 #define ERR_BADCHANNELKEY(server, channel) (":" + server + " 475 " + channel + " :Cannot join channel (+k)")
 #define ERR_CHANOPRIVISNEEDED(server, channel) (":" + server + " 482 " + channel + " :You're not channel operator")
 #define ERR_UMODEUNKNOWNFLAG(server) (":" + server + " 501 :Unknown MODE flag")
+#define ERR_NOORIGIN(server) (":" + server + " 409 :No origin specified")

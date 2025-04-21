@@ -6,12 +6,14 @@
 /*   By: smiranda <smiranda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:33:36 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/18 14:59:49 by smiranda         ###   ########.fr       */
+/*   Updated: 2025/04/21 16:55:33 by smiranda         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CommandHandler.hpp"
 #include "../utils/Logger.hpp"
+#include "../client/Channel.hpp"
+#include "../client/Client.hpp"
 #include <iostream>
 
 CommandHandler::CommandHandler(Server &server, std::map<int, Client>& clients) : server_(server), clients_(clients)
@@ -113,7 +115,7 @@ void CommandHandler::cmdNick(int clientFd, const std::vector<std::string>& param
         server_.msgClient(clientFd, ERR_ERRONEUSNICKNAME(server_.getIP(), newNick));
         return;
     }
-    
+
     for (const auto& pair : clients)
     {
         if (pair.second.getNickName() == newNick && pair.first != clientFd)
@@ -133,7 +135,7 @@ void CommandHandler::cmdNick(int clientFd, const std::vector<std::string>& param
             userMsg = ":" + oldNick + "!" + client.getUserName() + "@" + server_.getIP();
         else
             userMsg = ":" + server_.getIP() + " NICK :" + newNick + "\r\n";
-        
+
         client.setNickName(newNick);
 
         std::set<int> notifiedClients;
@@ -166,7 +168,7 @@ Use Logger::log(...) for colored, categorized logs (Info, Warning, Error, etc.)
  */
 
 
-// To do getters and setters 
+// To do getters and setters
 // getClients()
 // getNickName()
 // setUserName()
@@ -179,7 +181,7 @@ void CommandHandler::cmdUser(int fd, const std::vector<std::string>& params)
 
     if (clients.find(clientFd) == clients.end())
         return;
-    
+
     Client& client = clients[clientFd];
     if (client.isLoggedIn()) //tbd
     {
@@ -196,10 +198,10 @@ void CommandHandler::cmdUser(int fd, const std::vector<std::string>& params)
     std::string realname = params[3];
     if (!realname.empty() && realname[0] == ':')
         realname = realname.substr(1);
-    client.setUserName(username);
-    client.setRealName(realname);
+    client.setUsername(username);
+    client.setRealname(realname);
 
-    if (!client.getNickName().empty())
+    if (!client.getNickname().empty())
     {
         client.setLoggedIn(true);
         server_.sendWelcome(clientFd, client); //tbd
@@ -242,13 +244,13 @@ void CommandHandler::cmdMsg(int fd, const std::vector<std::string>& params)
 // isMember()
 // getMembers()
 // removeClientFromChannel() --> Remove user from the channel
-// removeClient() --> Close socket and cleanup 
+// removeClient() --> Close socket and cleanup
 
 void CommandHandler::cmdQuit(int fd, const std::vector<std::string>& params)
 {
     Client& client = server_.getClient(fd);
     std::string quitMsg = (params.empty()) ? "Client Quit" : params[0];
-    std::string fullQuitMsg = ":" + client.getNickName() + "!" + client.getUserName() + "@localhost QUIT :" + quitMsg + "\r\n";
+    std::string fullQuitMsg = ":" + client.getNickName() + "!" + client.getUsername() + "@localhost QUIT :" + quitMsg + "\r\n";
 
     std::set<int> notifiedClients;
     for (const auto& channelPair : server_.getChannels())
@@ -273,12 +275,33 @@ void CommandHandler::cmdQuit(int fd, const std::vector<std::string>& params)
 
 void CommandHandler::cmdPing(int fd, const std::vector<std::string>& params)
 {
+	if (params.empty())
+	{
+		server_.msgClient(fd, ERR_NOORIGIN(server_.getIP()));
+		return;
+	}
 
+	std::string token = params[0];
+	std::string response = ":" + server_.getIP() + " PONG " + server_.getIP() + " :" + token + "\r\n";
+
+	Logger::log(LogLevel::Ping, "Received PING from client fd=" + std::to_string(fd));
+	server_.msgClient(fd, response);
 }
 
 void CommandHandler::cmdPong(int fd, const std::vector<std::string>& params)
 {
+	std::map<int, Client>& clients = server_.getClients();
 
+	auto it = clients.find(fd);
+	if (it != clients.end())
+	{
+		it->second.updatePongReceived();
+		Logger::log(LogLevel::Pong, "Received PONG from client fd=" + std::to_string(fd));
+	}
+	else
+	{
+		Logger::warning("Received PONG from unknown client fd=" + std::to_string(fd));
+	}
 }
 
 void CommandHandler::cmdTopic(int fd, const std::vector<std::string>& params)
