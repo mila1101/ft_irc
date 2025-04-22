@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandHandler.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:33:34 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/22 15:41:08 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/22 16:32:33 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ class CommandHandler
 		 void addCommand(const std::string& name, CommandFunc handler);
 
 		// command implementation (To do by Siria)
+		void cmdCap(int clientFd, const std::vector<std::string>& params);
 		void cmdNick(int clientFd, const std::vector<std::string>& params);
 		void cmdUser(int clientFd, const std::vector<std::string>& params);
 		void cmdJoin(int clientFd, const std::vector<std::string>& params);

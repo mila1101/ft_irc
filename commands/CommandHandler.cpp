@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:33:36 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/22 15:41:01 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/22 16:41:28 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 
 CommandHandler::CommandHandler(Server &server) : server_(server)
 {
+	addCommand("CAP", &CommandHandler::cmdCap);
 	addCommand("NICK", &CommandHandler::cmdNick);
 	addCommand("USER", &CommandHandler::cmdUser);
 	addCommand("JOIN", &CommandHandler::cmdJoin);
@@ -55,6 +56,19 @@ void CommandHandler::dispatch(int clientFd, const ParsedCommand& cmd)
 	}
 }
 
+void CommandHandler::cmdCap(int clientFd, const std::vector<std::string>& params)
+{
+    if (params.empty()) {
+        return;
+    }
+
+    if (params[0] == "LS") {
+        server_.msgClient(clientFd, ":" + server_.getIP() + " CAP * LS :");
+    }
+    else if (params[0] == "END") {
+        return;
+    }
+}
 
 // To do:
 // getClients() done

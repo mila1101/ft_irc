@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+         #
+#    By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/12 17:38:35 by eahn              #+#    #+#              #
-#    Updated: 2025/04/22 15:25:47 by eahn             ###   ########.fr        #
+#    Updated: 2025/04/22 15:46:22 by msoklova         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,7 +23,7 @@ OBJ_DIR = ./obj/
 
 CLIENT_SRCS = Client.cpp
 COMMANDS_SRCS = CommandHandler.cpp
-CORE_SRCS = Server.cpp SocketHandler.cpp
+CORE_SRCS = Server.cpp SocketHandler.cpp main.cpp
 UTILS_SRCS = InputParser.cpp Logger.cpp
 
 # Full paths to sources
@@ -58,7 +58,7 @@ $(OBJ_DIR)%.o: %.cpp | $(OBJ_DIR)
 
 # Link all objects to create executable
 $(NAME): $(OBJ_PATHS)
-	$(CC) $(CFLAGS) $(OBJ_PATHS) -o
+	$(CC) $(CFLAGS) $(OBJ_PATHS) -o $(NAME)
 
 clean:
 	@rm -f $(OBJS)

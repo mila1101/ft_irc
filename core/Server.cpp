@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 16:05:10 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/22 15:02:32 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/22 15:43:11 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,10 +20,10 @@ Server* Server::instance_ = nullptr;  // init static singleton pointer
 Server::Server (int port, const std::string& password)
 	: port_(port), password_(password), listenFd_(-1), running_(false)
 {
-	instance_ = this; 
+	instance_ = this;
 
 	setupSignalHandler();
-	
+
 	if (!initSocket())
 		throw std::runtime_error("Failed to initialize server socket");
 
@@ -32,12 +32,12 @@ Server::Server (int port, const std::string& password)
         serverIp_ = std::string(hostBuffer);
     else
         serverIp_ = "127.0.0.1"; // fallback for safety
-	
+
 	serverName_ = serverIp_;
 
 	setupPoll();
 
-	commandHandler_ = std::make_unique<CommandHandler>();
+	commandHandler_ = std::make_unique<CommandHandler>(*this);
     socketHandler_ = std::make_unique<SocketHandler>(pollFds_, *commandHandler_);
 
 	Logger::info ("Server initialized on port " + std::to_string(port_));
@@ -262,13 +262,13 @@ void Server::removeClientFromChannel(int fd, const std::string& channelName)
 void Server::sendWelcome(int fd, const Client& client)
 {
 	std::string nick = client.getNickName();
-	std::string serverName = getServerName(); 
+	std::string serverName = getServerName();
 
 	std::string welcome = ":" + serverName + " 001 " + nick + " :Welcome to the IRC server!\r\n";
 	std::string yourHost = ":" + serverName + " 002 " + nick + " :Your host is " + serverName + ", runnig version 1.0\r\n";
 	std::string created = ":" + serverName + " 003 " + nick + " :This server was created just now\r\n";
 	std::string myInfo = ":" + serverName + " 004 " + nick + " " + serverName + " v1.0 iotl\r\n";
-	
+
 	msgClient(fd, welcome);
 	msgClient(fd, yourHost);
 	msgClient(fd, created);
