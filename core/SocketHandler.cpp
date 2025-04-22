@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   SocketHandler.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 23:03:14 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/17 01:12:00 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/22 16:46:08 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "SocketHandler.hpp"
 
-SocketHandler::SocketHandler(std::vector<struct pollfd>& pollFds, CommandHandler& handler)
-    : pollFds_(pollFds), commandHandler_(handler) {}
+SocketHandler::SocketHandler(std::vector<struct pollfd>& pollFds, CommandHandler& handler, Server& server)
+    : pollFds_(pollFds), commandHandler_(handler), server_(server) {}
 
 SocketHandler::~SocketHandler() {}
 
@@ -29,12 +29,14 @@ void SocketHandler::acceptConnection(int listenFd)
 		return;
 	}
 
-	if (fcntl(clientFd, F_SETFL, O_NONBLOCK) < 0) 
+	if (fcntl(clientFd, F_SETFL, O_NONBLOCK) < 0)
 	{
 		Logger::warning("Failed to set non-blocking mode for client");
 		close(clientFd);
 		return;
 	}
+	std::string ipAddress = inet_ntoa(clientAddr.sin_addr);
+	server_.getClients()[clientFd] = Client(ipAddress, clientFd);
 
 	addClientSocket(clientFd);
 	Logger::log(LogLevel::Connection, "New client connected: fd=" + std::to_string(clientFd));
@@ -42,7 +44,7 @@ void SocketHandler::acceptConnection(int listenFd)
 
 void SocketHandler::receiveMessage(int clientFd)
 {
-	char buffer[1024] = {0}; 
+	char buffer[1024] = {0};
 	ssize_t bytesRead = recv(clientFd, buffer, sizeof(buffer) - 1, 0);
 
 	if (bytesRead <= 0)
@@ -64,7 +66,7 @@ void SocketHandler::receiveMessage(int clientFd)
 
 void SocketHandler::addClientSocket(int clientFd)
 {
-	struct pollfd clientPoll = 
+	struct pollfd clientPoll =
 	{
 		.fd = clientFd,
 		.events = POLLIN,

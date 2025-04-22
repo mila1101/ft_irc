@@ -6,7 +6,7 @@
 /*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:33:36 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/22 16:41:28 by msoklova         ###   ########.fr       */
+/*   Updated: 2025/04/22 16:48:07 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ void CommandHandler::cmdCap(int clientFd, const std::vector<std::string>& params
     }
 
     if (params[0] == "LS") {
-        server_.msgClient(clientFd, ":" + server_.getIP() + " CAP * LS :");
+        server_.msgClient(clientFd, "CAP * LS :");
     }
     else if (params[0] == "END") {
         return;
@@ -91,7 +91,7 @@ void CommandHandler::cmdNick(int clientFd, const std::vector<std::string>& param
 		return;
 	}
 	std::string newNick = params[0];
-	std::regex pattern("^[a-zA-Z][a-zA-Z0-9\\-_]{0,8}$");
+	std::regex pattern("^[a-zA-Z][a-zA-Z0-9\\-_]{0,15}$");
 
 	if (!std::regex_match(newNick, pattern))
 	{

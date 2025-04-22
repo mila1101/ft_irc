@@ -6,7 +6,7 @@
 /*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 16:05:10 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/22 15:43:11 by msoklova         ###   ########.fr       */
+/*   Updated: 2025/04/22 16:50:34 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ Server::Server (int port, const std::string& password)
 	setupPoll();
 
 	commandHandler_ = std::make_unique<CommandHandler>(*this);
-    socketHandler_ = std::make_unique<SocketHandler>(pollFds_, *commandHandler_);
+    socketHandler_ = std::make_unique<SocketHandler>(pollFds_, *commandHandler_, *this);
 
 	Logger::info ("Server initialized on port " + std::to_string(port_));
 }
