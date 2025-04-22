@@ -6,7 +6,8 @@
 /*   By: smiranda <smiranda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:33:36 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/22 15:06:41 by smiranda         ###   ########.fr       */
+
+/*   Updated: 2025/04/22 14:46:31 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,41 +19,41 @@
 
 CommandHandler::CommandHandler(Server &server, std::map<int, Client>& clients) : server_(server), clients_(clients)
 {
-    addCommand("NICK", &CommandHandler::cmdNick);
-    addCommand("USER", &CommandHandler::cmdUser);
-    addCommand("JOIN", &CommandHandler::cmdJoin);
-    addCommand("PRIVMSG", &CommandHandler::cmdMsg);
-    addCommand("QUIT", &CommandHandler::cmdQuit);
-    addCommand("PING", &CommandHandler::cmdPing);
-    addCommand("PONG", &CommandHandler::cmdPong);
-    addCommand("TOPIC", &CommandHandler::cmdTopic);
-    addCommand("KICK", &CommandHandler::cmdKick);
-    addCommand("INVITE", &CommandHandler::cmdInvite);
-    addCommand("MODE", &CommandHandler::cmdMode);
-    addCommand("PART", &CommandHandler::cmdPart);
+	addCommand("NICK", &CommandHandler::cmdNick);
+	addCommand("USER", &CommandHandler::cmdUser);
+	addCommand("JOIN", &CommandHandler::cmdJoin);
+	addCommand("PRIVMSG", &CommandHandler::cmdMsg);
+	addCommand("QUIT", &CommandHandler::cmdQuit);
+	addCommand("PING", &CommandHandler::cmdPing);
+	addCommand("PONG", &CommandHandler::cmdPong);
+	addCommand("TOPIC", &CommandHandler::cmdTopic);
+	addCommand("KICK", &CommandHandler::cmdKick);
+	addCommand("INVITE", &CommandHandler::cmdInvite);
+	addCommand("MODE", &CommandHandler::cmdMode);
+	addCommand("PART", &CommandHandler::cmdPart);
 }
 
 CommandHandler::~CommandHandler() {}
 
 void CommandHandler::addCommand(const std::string& name, CommandFunc handler)
 {
-    commandTable[name] = std::bind(handler, this, std::placeholders::_1, std::placeholders::_2);
+	commandTable[name] = std::bind(handler, this, std::placeholders::_1, std::placeholders::_2);
 }
 
 void CommandHandler::dispatch(int clientFd, const ParsedCommand& cmd)
 {
-    if (cmd.command.empty()) {
-        Logger::warning("Empty command received from fd=" + std::to_string(clientFd));
-        return;
-    }
+	if (cmd.command.empty()) {
+		Logger::warning("Empty command received from fd=" + std::to_string(clientFd));
+		return;
+	}
 
-    auto it = commandTable.find(cmd.command);
-    if (it != commandTable.end()) {
-        Logger::info("Dispatching command: " + cmd.command + " from fd=" + std::to_string(clientFd));
-        it->second(clientFd, cmd.params);
-    } else {
-        Logger::warning("Unknown command: " + cmd.command + " from fd=" + std::to_string(clientFd));
-    }
+	auto it = commandTable.find(cmd.command);
+	if (it != commandTable.end()) {
+		Logger::info("Dispatching command: " + cmd.command + " from fd=" + std::to_string(clientFd));
+		it->second(clientFd, cmd.params);
+	} else {
+		Logger::warning("Unknown command: " + cmd.command + " from fd=" + std::to_string(clientFd));
+	}
 }
 
 
@@ -67,63 +68,63 @@ void CommandHandler::dispatch(int clientFd, const ParsedCommand& cmd)
 // isLoggedIn()
 void CommandHandler::cmdNick(int clientFd, const std::vector<std::string>& params)
 {
-    std::map<int, Client>& clients = server_.getClients(); //getClients tbd
-    const std::map<std::string, Channel>& channels = server_.getChannels(); //getChannels tbd
+	std::map<int, Client>& clients = server_.getClients(); //getClients tbd
+	const std::map<std::string, Channel>& channels = server_.getChannels(); //getChannels tbd
 
-    if (params.empty())
-    {
-        Logger::warning("NICK: no nickname provided from fd=" + std::to_string(clientFd));
-        server_.msgClient(clientFd, ERR_NONICKNAMEGIVEN(server_.getIP())); //getIP tbd
-        return;
-    }
-    std::string newNick = params[0];
-    std::regex pattern("^[a-zA-Z][a-zA-Z0-9\\-_]{0,8}$");
+	if (params.empty())
+	{
+		Logger::warning("NICK: no nickname provided from fd=" + std::to_string(clientFd));
+		server_.msgClient(clientFd, ERR_NONICKNAMEGIVEN(server_.getIP())); //getIP tbd
+		return;
+	}
+	std::string newNick = params[0];
+	std::regex pattern("^[a-zA-Z][a-zA-Z0-9\\-_]{0,8}$");
 
-    if (!std::regex_match(newNick, pattern))
-    {
-        server_.msgClient(clientFd, ERR_ERRONEUSNICKNAME(server_.getIP(), newNick));
-        return;
-    }
+	if (!std::regex_match(newNick, pattern))
+	{
+		server_.msgClient(clientFd, ERR_ERRONEUSNICKNAME(server_.getIP(), newNick));
+		return;
+	}
 
-    for (const auto& pair : clients)
-    {
-        if (pair.second.getNickName() == newNick && pair.first != clientFd)
-        {
-            server_.msgClient(clientFd, ERR_NICKNAMEINUSE(server_.getIP(), newNick));
-            return;
-        }
-    }
+	for (const auto& pair : clients)
+	{
+		if (pair.second.getNickName() == newNick && pair.first != clientFd)
+		{
+			server_.msgClient(clientFd, ERR_NICKNAMEINUSE(server_.getIP(), newNick));
+			return;
+		}
+	}
 
-    Client& client = clients[clientFd];
-    std::string oldNick = client.getNickName();
+	Client& client = clients[clientFd];
+	std::string oldNick = client.getNickName();
 
-    if (oldNick != newNick)
-    {
-        std::string userMsg;
-        if (client.isRegistered())
-            userMsg = ":" + oldNick + "!" + client.getUserName() + "@" + server_.getIP();
-        else
-            userMsg = ":" + server_.getIP() + " NICK :" + newNick + "\r\n";
+	if (oldNick != newNick)
+	{
+		std::string userMsg;
+		if (client.isRegistered())
+			userMsg = ":" + oldNick + "!" + client.getUserName() + "@" + server_.getIP();
+		else
+			userMsg = ":" + server_.getIP() + " NICK :" + newNick + "\r\n";
 
-        client.setNickName(newNick);
+		client.setNickName(newNick);
 
-        std::set<int> notifiedClients;
-        for (const auto& channel : channels)
-        {
-            if (channel.second.isMember(clientFd))
-            {
-                for (int memberFd : channel.second.getMembers())
-                {
-                    if (notifiedClients.insert(memberFd).second)
-                    {
-                        server_.msgClient(memberFd, userMsg);
-                    }
-                }
-            }
-        }
-        if (notifiedClients.find(clientFd) == notifiedClients.end())
-            server_.msgClient(clientFd, userMsg);
-    }
+		std::set<int> notifiedClients;
+		for (const auto& channel : channels)
+		{
+			if (channel.second.isMember(clientFd))
+			{
+				for (int memberFd : channel.second.getMembers())
+				{
+					if (notifiedClients.insert(memberFd).second)
+					{
+						server_.msgClient(memberFd, userMsg);
+					}
+				}
+			}
+		}
+		if (notifiedClients.find(clientFd) == notifiedClients.end())
+			server_.msgClient(clientFd, userMsg);
+	}
 }
 
 /**
@@ -179,60 +180,60 @@ void CommandHandler::cmdUser(int fd, const std::vector<std::string>& params)
 
 void CommandHandler::cmdJoin(int fd, const std::vector<std::string>& params)
 {
-    if (params.empty() || params[0] == ":")
-    {
-        server_.msgClient(fd, ERR_NEEDMOREPARAMS(server_.getServerName(), "JOIN"));
-        return;
-    }
-    std::string channelName = params[0];
-    std::string password = (params.size() > 1) ? params[1] : "";
+	if (params.empty() || params[0] == ":")
+	{
+		server_.msgClient(fd, ERR_NEEDMOREPARAMS(server_.getServerName(), "JOIN"));
+		return;
+	}
+	std::string channelName = params[0];
+	std::string password = (params.size() > 1) ? params[1] : "";
 
-    if (channelName[0] != '#')
-        channelName = "#" + channelName;
+	if (channelName[0] != '#')
+		channelName = "#" + channelName;
 
-    //Create channel
-    if (server_.getChannels().find(channelName) == server_.getChannels().end())
-    {
-        server_.getChannels().emplace(channelName, Channel(channelName));
-        Logger::info("Channel " + channelName + " created by " + server_.getClient(fd).getNickName());
-    }
+	//Create channel
+	if (server_.getChannels().find(channelName) == server_.getChannels().end())
+	{
+		server_.getChannels().emplace(channelName, Channel(channelName));
+		Logger::info("Channel " + channelName + " created by " + server_.getClient(fd).getNickName());
+	}
 
-    Channel& channel = server_.getChannels()[channelName];
-    bool isFirstMember = channel.getMembers().empty();
+	Channel& channel = server_.getChannels()[channelName];
+	bool isFirstMember = channel.getMembers().empty();
 
-    // Restrictions
-    if (!channel.getPassword().empty() && password != channel.getPassword())
-    {
-        server_.msgClient(fd, ERR_BADCHANNELKEY(server_.getIP(), channelName));
-        return;
-    }
-    if (channel.isInviteOnly() && !channel.isInvited(fd))
-    {
-        server_.msgClient(fd, ERR_INVITEONLYCHAN(server_.getIP(), channelName));
-        return;
-    }
-    if (channel.isFull())
-    {
-        server_.msgClient(fd, ERR_CHANNELISFULL(server_.getIP(), channelName));
-        return;
-    }
+	// Restrictions
+	if (!channel.getPassword().empty() && password != channel.getPassword())
+	{
+		server_.msgClient(fd, ERR_BADCHANNELKEY(server_.getIP(), channelName));
+		return;
+	}
+	if (channel.isInviteOnly() && !channel.isInvited(fd))
+	{
+		server_.msgClient(fd, ERR_INVITEONLYCHAN(server_.getIP(), channelName));
+		return;
+	}
+	if (channel.isFull())
+	{
+		server_.msgClient(fd, ERR_CHANNELISFULL(server_.getIP(), channelName));
+		return;
+	}
 
-    channel.addMember(fd);
-    std::string joinMsg = RPL_JOIN(server_.getIP(), server_.getClient(fd).getNickName(), channelName);
-    for (int memberFd : channel.getMembers())
-        server_.msgClient(memberFd, joinMsg);
-    if (isFirstMember)
-    {
-        channel.addOperator(fd);
-        server_.msgClient(fd, RPL_SERVERMODE(server_.getIP(), channelName, "+o", server_.getClient(fd).getNickName()));
-        server_.msgClient(fd, RPL_YOUROP);
-    }
+	channel.addMember(fd);
+	std::string joinMsg = RPL_JOIN(server_.getIP(), server_.getClient(fd).getNickName(), channelName);
+	for (int memberFd : channel.getMembers())
+		server_.msgClient(memberFd, joinMsg);
+	if (isFirstMember)
+	{
+		channel.addOperator(fd);
+		server_.msgClient(fd, RPL_SERVERMODE(server_.getIP(), channelName, "+o", server_.getClient(fd).getNickName()));
+		server_.msgClient(fd, RPL_YOUROP);
+	}
 
-    if (channel.getTopic().empty())
-        server_.msgClient(fd, RPL_NOTOPIC(server_.getIP(), server_.getClient(fd).getNickName(), channelName));
-    else
-        server_.msgClient(fd, RPL_TOPIC(server_.getIP(), server_.getClient(fd).getNickName(), channelName, channel.getTopic()));
-    Logger::info("Client " + server_.getClient(fd).getNickName() + " joined channel " + channelName);
+	if (channel.getTopic().empty())
+		server_.msgClient(fd, RPL_NOTOPIC(server_.getIP(), server_.getClient(fd).getNickName(), channelName));
+	else
+		server_.msgClient(fd, RPL_TOPIC(server_.getIP(), server_.getClient(fd).getNickName(), channelName, channel.getTopic()));
+	Logger::info("Client " + server_.getClient(fd).getNickName() + " joined channel " + channelName);
 }
 
 void CommandHandler::cmdMsg(int fd, const std::vector<std::string>& params)
@@ -328,29 +329,29 @@ void CommandHandler::cmdMsg(int fd, const std::vector<std::string>& params)
 
 void CommandHandler::cmdQuit(int fd, const std::vector<std::string>& params)
 {
-    Client& client = server_.getClient(fd);
-    std::string quitMsg = (params.empty()) ? "Client Quit" : params[0];
-    std::string fullQuitMsg = ":" + client.getNickName() + "!" + client.getUserName() + "@localhost QUIT :" + quitMsg + "\r\n";
+	Client& client = server_.getClient(fd);
+	std::string quitMsg = (params.empty()) ? "Client Quit" : params[0];
+	std::string fullQuitMsg = ":" + client.getNickName() + "!" + client.getUserName() + "@localhost QUIT :" + quitMsg + "\r\n";
 
-    std::set<int> notifiedClients;
-    for (const auto& channelPair : server_.getChannels())
-    {
-        const Channel& channel = channelPair.second;
-        if (channel.isMember(fd))
-        {
-            for (int memberFd : channel.getMembers())
-            {
-                if (notifiedClients.insert(memberFd).second && memberFd != fd)
-                {
-                    server_.msgClient(memberFd, fullQuitMsg);
-                }
-            }
-            server_.removeClientFromChannel(fd, channelPair.first);
-        }
-    }
-    Logger::info("Client with fd=" + std::to_string(fd) + " quit: " + quitMsg);
-    server_.msgClient(fd, fullQuitMsg);
-    server_.removeClient(fd);
+	std::set<int> notifiedClients;
+	for (const auto& channelPair : server_.getChannels())
+	{
+		const Channel& channel = channelPair.second;
+		if (channel.isMember(fd))
+		{
+			for (int memberFd : channel.getMembers())
+			{
+				if (notifiedClients.insert(memberFd).second && memberFd != fd)
+				{
+					server_.msgClient(memberFd, fullQuitMsg);
+				}
+			}
+			server_.removeClientFromChannel(fd, channelPair.first);
+		}
+	}
+	Logger::info("Client with fd=" + std::to_string(fd) + " quit: " + quitMsg);
+	server_.msgClient(fd, fullQuitMsg);
+	server_.removeClient(fd);
 }
 
 void CommandHandler::cmdPing(int fd, const std::vector<std::string>& params)
@@ -386,73 +387,158 @@ void CommandHandler::cmdPong(int fd, const std::vector<std::string>& params)
 
 void CommandHandler::cmdTopic(int fd, const std::vector<std::string>& params)
 {
-    if (params.empty())
-    {
-        server_.msgClient(fd, ERR_NEEDMOREPARAMS(server_.getIP(), "TOPIC"));
-        Logger::warning("TOPIC: Not enough parameters from fd=" + std::to_string(fd));
-        return;
-    }
+	if (params.empty())
+	{
+		server_.msgClient(fd, ERR_NEEDMOREPARAMS(server_.getIP(), "TOPIC"));
+		Logger::warning("TOPIC: Not enough parameters from fd=" + std::to_string(fd));
+		return;
+	}
 
-    const std::string& channelName = params[0];
-    std::string topic;
+	const std::string& channelName = params[0];
+	std::string topic;
 
-    if (params.size() > 1)
-    {
-        for (size_t i = 1; i < params.size(); ++i)
-        {
-            topic += params[i];
-            if (i != params.size() - 1)
-                topic += " ";
-        }
-        if (!topic.empty() && topic[0] == ':')
-            topic = topic.substr(1);
-    }
-    std::map<std::string, Channel>& channels = server_.getChannels();
-    std::map<std::string, Channel>::iterator it = channels.find(channelName);
-    if (it == channels.end())
-    {
-        server_.msgClient(fd, ERR_NOSUCHCHANNEL(server_.getIP(), channelName));
-        return;
-    }
+	if (params.size() > 1)
+	{
+		for (size_t i = 1; i < params.size(); ++i)
+		{
+			topic += params[i];
+			if (i != params.size() - 1)
+				topic += " ";
+		}
+		if (!topic.empty() && topic[0] == ':')
+			topic = topic.substr(1);
+	}
+	std::map<std::string, Channel>& channels = server_.getChannels();
+	std::map<std::string, Channel>::iterator it = channels.find(channelName);
+	if (it == channels.end())
+	{
+		server_.msgClient(fd, ERR_NOSUCHCHANNEL(server_.getIP(), channelName));
+		return;
+	}
 
-    Channel& channel = it->second;
-    if (!channel.isMember(fd))
-    {
-        server_.msgClient(fd, ERR_NOTONCHANNEL(server_.getIP(), channelName));
-        return;
-    }
+	Channel& channel = it->second;
+	if (!channel.isMember(fd))
+	{
+		server_.msgClient(fd, ERR_NOTONCHANNEL(server_.getIP(), channelName));
+		return;
+	}
 
-    const std::string& nick = server_.getClient(fd).getNickName();
+	const std::string& nick = server_.getClient(fd).getNickName();
 
-    if (topic.empty())
-    {
-        const std::string& currentTopic = channel.getTopic();
-        if (currentTopic.empty())
-            server_.msgClient(fd, RPL_NOTOPIC(server_.getIP(), nick, channelName));
-        else
-            server_.msgClient(fd, RPL_TOPIC(server_.getIP(), nick, channelName, currentTopic));
-    }
+	if (topic.empty())
+	{
+		const std::string& currentTopic = channel.getTopic();
+		if (currentTopic.empty())
+			server_.msgClient(fd, RPL_NOTOPIC(server_.getIP(), nick, channelName));
+		else
+			server_.msgClient(fd, RPL_TOPIC(server_.getIP(), nick, channelName, currentTopic));
+	}
 
-    if (channel.isTopicRestriction() && !channel.isOperator(fd))
-    {
-        server_.msgClient(fd, ERR_CHANOPRIVISNEEDED(server_.getIP(), channelName));
-        return;
-    }
+	if (channel.isTopicRestriction() && !channel.isOperator(fd))
+	{
+		server_.msgClient(fd, ERR_CHANOPRIVISNEEDED(server_.getIP(), channelName));
+		return;
+	}
 
-    channel.setTopic(topic);
-    std::string topicMsg = RPL_TOPIC(server_.getIP(), nick, channelName, topic);
+	channel.setTopic(topic);
+	std::string topicMsg = RPL_TOPIC(server_.getIP(), nick, channelName, topic);
 
-    const std::set<int>& members = channel.getMembers();
-    for (std::set<int>::const_iterator it = members.begin(); it != members.end(); ++it)
-    {
-        server_.msgClient(*it, topicMsg);
-    }
-    Logger::info("Topic set to '" + topic + "' for channel " + channelName + " by " + nick);
+	const std::set<int>& members = channel.getMembers();
+	for (std::set<int>::const_iterator it = members.begin(); it != members.end(); ++it)
+	{
+		server_.msgClient(*it, topicMsg);
+	}
+	Logger::info("Topic set to '" + topic + "' for channel " + channelName + " by " + nick);
 }
 
 void CommandHandler::cmdKick(int fd, const std::vector<std::string>& params)
 {
+	if (params.size() < 2)
+	{
+		server_.msgClient(fd, ERR_NEEDMOREPARAMS(server_.getIP(), "KICK"));
+		Logger::warning("KICK: Not enough parameters from fd=" + std::to_string(fd));
+		return;
+	}
 
+	std::string channelName = params[0];
+	std::string targetNick = params[1];
+	std::string kickReason;
+
+	if (channelName[0] != '#')
+		channelName = "#" + channelName;
+
+	if (params.size() > 2)
+	{
+		for (size_t i = 2; i < params.size(); ++i)
+		{
+			kickReason += params[i];
+			if (i != params.size() - 1)
+				kickReason += " ";
+		}
+		if (!kickReason.empty() && kickReason[0] == ':')
+			kickReason = kickReason.substr(1);
+	}
+
+	if (kickReason.empty())
+		kickReason = "No reason";
+
+	std::map<std::string, Channel> &channels = server_.getChannels();
+	auto channelIt = channels.find(channelName);
+	if (channelIt == channels.end())
+	{
+		server_.msgClient(fd, ERR_NOSUCHCHANNEL(server_.getIP(), channelName));
+		return;
+	}
+
+	Channel &channel = channelIt->second;
+	if (!channel.isMember(fd))
+	{
+		server_.msgClient(fd, ERR_NOTONCHANNEL(server_.getIP(), channelName));
+		return;
+	}
+
+	if (!channel.isOperator(fd))
+	{
+		server_.msgClient(fd, ERR_CHANOPRIVISNEEDED(server_.getIP(), channelName));
+		return;
+	}
+
+	int targetFd = -1;
+	for (const auto& pair : server_.getClients())
+	{
+		if (pair.second.getNickName() == targetNick)
+		{
+			targetFd = pair.first;
+			break;
+		}
+	}
+
+	if (targetFd == -1)
+	{
+		server_.msgClient(fd, ERR_NOSUCHNICK(server_.getIP(), targetNick));
+		return;
+	}
+
+	if (!channel.isMember(targetFd))
+	{
+		server_.msgClient(fd, ERR_USERNOTINCHANNEL(server_.getIP(), targetNick, channelName));
+		return;
+	}
+
+	const std::string &kickerNick = server_.getClient(fd).getNickName();
+	std::string kickMsg = ":" + kickerNick + "!" + server_.getClient(fd).getUserName() +
+						"@" + server_.getIP() + " KICK " + channelName + " " +
+						targetNick + " :" + kickReason;
+
+	for (int memberFd : channel.getMembers())
+	{
+		server_.msgClient(memberFd, kickMsg);
+	}
+
+	server_.removeClientFromChannel(targetFd, channelName);
+
+	Logger::log(LogLevel::Channel, "User " + targetNick + " was kicked from " +
+			channelName + " by " + kickerNick + " (" + kickReason + ")");
 }
 
 void CommandHandler::cmdInvite(int fd, const std::vector<std::string>& params)
@@ -507,146 +593,146 @@ void CommandHandler::cmdInvite(int fd, const std::vector<std::string>& params)
 
 void CommandHandler::cmdMode(int fd, const std::vector<std::string>& params)
 {
-    if (params.empty())
-    {
-        server_.msgClient(fd, ERR_NEEDMOREPARAMS(server_.getIP(), "MODE"));
-        Logger::warning("MODE: Not enough parameters from fd=" + std::to_string(fd));
-        return;
-    }
+	if (params.empty())
+	{
+		server_.msgClient(fd, ERR_NEEDMOREPARAMS(server_.getIP(), "MODE"));
+		Logger::warning("MODE: Not enough parameters from fd=" + std::to_string(fd));
+		return;
+	}
 
-    std::string channelName = params[0];
-    if (channelName[0] != '#')
-        channelName = "#" + channelName;
+	std::string channelName = params[0];
+	if (channelName[0] != '#')
+		channelName = "#" + channelName;
 
-    std::map<std::string, Channel>& channels = server_.getChannels();
-    std::map<std::string, Channel>::iterator it = channels.find(channelName);
-    if (it == channels.end()) {
-        server_.msgClient(fd, ERR_NOSUCHCHANNEL(server_.getIP(), channelName));
-        return;
-    }
+	std::map<std::string, Channel>& channels = server_.getChannels();
+	std::map<std::string, Channel>::iterator it = channels.find(channelName);
+	if (it == channels.end()) {
+		server_.msgClient(fd, ERR_NOSUCHCHANNEL(server_.getIP(), channelName));
+		return;
+	}
 
-    Channel& channel = it->second;
-    if (!channel.isMember(fd)) {
-        server_.msgClient(fd, ERR_NOTONCHANNEL(server_.getIP(), channelName));
-        return;
-    }
+	Channel& channel = it->second;
+	if (!channel.isMember(fd)) {
+		server_.msgClient(fd, ERR_NOTONCHANNEL(server_.getIP(), channelName));
+		return;
+	}
 
-    if (params.size() < 2) {
+	if (params.size() < 2) {
 
-    std::string modes;
-    if (channel.isInviteOnly()) modes += "i";
-    if (channel.isTopicRestriction()) modes += "t";
-    if (channel.hasPassword()) modes += "k";
-    if (channel.hasUserLimit()) modes += "l";
+	std::string modes;
+	if (channel.isInviteOnly()) modes += "i";
+	if (channel.isTopicRestriction()) modes += "t";
+	if (channel.hasPassword()) modes += "k";
+	if (channel.hasUserLimit()) modes += "l";
 
-    std::string reply = ":" + server_.getIP() + " 324 " + server_.getClient(fd).getNickName()
-                          + " " + channelName + " +" + modes + "\r\n";
-    server_.msgClient(fd, reply);
-    return;
-    }
-    const std::string& modeStr = params[1];
-    bool adding = true;
-    size_t paramIndex = 2;
+	std::string reply = ":" + server_.getIP() + " 324 " + server_.getClient(fd).getNickName()
+						  + " " + channelName + " +" + modes + "\r\n";
+	server_.msgClient(fd, reply);
+	return;
+	}
+	const std::string& modeStr = params[1];
+	bool adding = true;
+	size_t paramIndex = 2;
 
-    for (size_t i = 0; i < modeStr.size(); ++i)
-    {
-        char c = modeStr[i];
-        if (c == '+') { adding = true; continue; }
-        if (c == '-') { adding = false; continue; }
+	for (size_t i = 0; i < modeStr.size(); ++i)
+	{
+		char c = modeStr[i];
+		if (c == '+') { adding = true; continue; }
+		if (c == '-') { adding = false; continue; }
 
-        switch (c)
-        {
-            case 'i':
-                channel.setInviteOnly(adding);
-                break;
-            case 't':
-                channel.setTopicRestriction(adding); // To Do in Channel.hpp
-                break;
-            case 'k':
-                if (adding) {
-                    if (paramIndex >= params.size()) {
-                        server_.msgClient(fd, ERR_NEEDMOREPARAMS(server_.getIP(), "MODE +k"));
-                        return;
-                    }
-                    channel.setPassword(params[paramIndex++]);
-                } else {
-                    channel.setPassword("");
-                }
-                break;
-            case 'l':
-                if (adding) {
-                    if (paramIndex >= params.size()) {
-                        server_.msgClient(fd, ERR_NEEDMOREPARAMS(server_.getIP(), "MODE +l"));
-                        return;
-                    }
-                    channel.setUserLimit(std::atoi(params[paramIndex++].c_str()));
-                } else {
-                    channel.setUserLimit(-1); // no limit
-                }
-                break;
-            default:
-                server_.msgClient(fd, ERR_UNKNOWNMODE(server_.getIP(), std::string(1, c), channelName));
-                Logger::warning("MODE: Unknown mode '" + std::string(1, c) + "' from fd=" + std::to_string(fd));
-                return;
-        }
-    }
+		switch (c)
+		{
+			case 'i':
+				channel.setInviteOnly(adding);
+				break;
+			case 't':
+				channel.setTopicRestriction(adding); // To Do in Channel.hpp
+				break;
+			case 'k':
+				if (adding) {
+					if (paramIndex >= params.size()) {
+						server_.msgClient(fd, ERR_NEEDMOREPARAMS(server_.getIP(), "MODE +k"));
+						return;
+					}
+					channel.setPassword(params[paramIndex++]);
+				} else {
+					channel.setPassword("");
+				}
+				break;
+			case 'l':
+				if (adding) {
+					if (paramIndex >= params.size()) {
+						server_.msgClient(fd, ERR_NEEDMOREPARAMS(server_.getIP(), "MODE +l"));
+						return;
+					}
+					channel.setUserLimit(std::atoi(params[paramIndex++].c_str()));
+				} else {
+					channel.setUserLimit(-1); // no limit
+				}
+				break;
+			default:
+				server_.msgClient(fd, ERR_UNKNOWNMODE(server_.getIP(), std::string(1, c), channelName));
+				Logger::warning("MODE: Unknown mode '" + std::string(1, c) + "' from fd=" + std::to_string(fd));
+				return;
+		}
+	}
 
-    Logger::info("Client " + server_.getClient(fd).getNickName() + " changed mode of " + channelName + " to " + modeStr);
+	Logger::info("Client " + server_.getClient(fd).getNickName() + " changed mode of " + channelName + " to " + modeStr);
 }
 
 void CommandHandler::cmdPart(int fd, const std::vector<std::string>& params)
 {
-    if (params.empty())
-    {
-        server_.msgClient(fd, ERR_NEEDMOREPARAMS(server_.getIP(), "PART"));
-        Logger::warning("PART: Not enough parameters from fd=" + std::to_string(fd));
-        return;
-    }
+	if (params.empty())
+	{
+		server_.msgClient(fd, ERR_NEEDMOREPARAMS(server_.getIP(), "PART"));
+		Logger::warning("PART: Not enough parameters from fd=" + std::to_string(fd));
+		return;
+	}
 
-    std::string channelName = params[0];
-    if (channelName[0] != '#')
-        channelName = "#" + channelName;
+	std::string channelName = params[0];
+	if (channelName[0] != '#')
+		channelName = "#" + channelName;
 
-    std::map<std::string, Channel>& channels = server_.getChannels();
-    std::map<std::string, Channel>::iterator it = channels.find(channelName);
+	std::map<std::string, Channel>& channels = server_.getChannels();
+	std::map<std::string, Channel>::iterator it = channels.find(channelName);
 
-    if (it == channels.end())
-    {
-        server_.msgClient(fd, ERR_NOSUCHCHANNEL(server_.getIP(), channelName));
-        return;
-    }
+	if (it == channels.end())
+	{
+		server_.msgClient(fd, ERR_NOSUCHCHANNEL(server_.getIP(), channelName));
+		return;
+	}
 
-    Channel& channel = it->second;
-    if (!channel.isMember(fd))
-    {
-        server_.msgClient(fd, ERR_NOTONCHANNEL(server_.getIP(), channelName));
-        return;
-    }
+	Channel& channel = it->second;
+	if (!channel.isMember(fd))
+	{
+		server_.msgClient(fd, ERR_NOTONCHANNEL(server_.getIP(), channelName));
+		return;
+	}
 
-    // Optional part message
-    std::string partMsg = (params.size() > 1) ? params[1] : "";
-    for (size_t i = 2; i < params.size(); ++i)
-    {
-       partMsg += " " + params[i];
-    }
-    if (!partMsg.empty() && partMsg[0] == ':')
-        partMsg = partMsg.substr(1);
+	// Optional part message
+	std::string partMsg = (params.size() > 1) ? params[1] : "";
+	for (size_t i = 2; i < params.size(); ++i)
+	{
+	   partMsg += " " + params[i];
+	}
+	if (!partMsg.empty() && partMsg[0] == ':')
+		partMsg = partMsg.substr(1);
 
-    const Client& client = server_.getClient(fd);
-    std::string fullMsg = ":" + client.getNickName() + "!" + client.getUserName() + "@localhost PART " + channelName;
-    if (!partMsg.empty())
-        fullMsg += " :" + partMsg;
-    fullMsg += "\r\n";
+	const Client& client = server_.getClient(fd);
+	std::string fullMsg = ":" + client.getNickName() + "!" + client.getUserName() + "@localhost PART " + channelName;
+	if (!partMsg.empty())
+		fullMsg += " :" + partMsg;
+	fullMsg += "\r\n";
 
-    // Notify all members
-    const std::set<int>& members = channel.getMembers();
-    for (std::set<int>::const_iterator it = members.begin(); it != members.end(); ++it)
-    {
-        server_.msgClient(*it, fullMsg);
-    }
+	// Notify all members
+	const std::set<int>& members = channel.getMembers();
+	for (std::set<int>::const_iterator it = members.begin(); it != members.end(); ++it)
+	{
+		server_.msgClient(*it, fullMsg);
+	}
 
-    Logger::info("Client " + client.getNickName() + " parted from " + channelName + (partMsg.empty() ? "" : " (" + partMsg + ")"));
+	Logger::info("Client " + client.getNickName() + " parted from " + channelName + (partMsg.empty() ? "" : " (" + partMsg + ")"));
 
-    // Remove user from channel
-    server_.removeClientFromChannel(fd, channelName);
+	// Remove user from channel
+	server_.removeClientFromChannel(fd, channelName);
 }

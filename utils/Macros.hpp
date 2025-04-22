@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Macros.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smiranda <smiranda@student.42.fr>          +#+  +:+       +#+        */
+/*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 14:12:09 by smiranda          #+#    #+#             */
-/*   Updated: 2025/04/21 19:00:25 by smiranda         ###   ########.fr       */
+/*   Updated: 2025/04/22 12:12:29 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,13 +21,13 @@
 
 // Errors
 #define ERR_NOSUCHNICK(server, nick) (":" + server + " 401 " + nick + " :No such nick/channel")
-#define ERR_NOSUCHCHANEL(server, channel) (":" + server + " 403 " + channel + " : No such channel")
+#define ERR_NOSUCHCHANNEL(server, channel) (":" + server + " 403 " + channel + " : No such channel")
 #define ERR_CANNOTSENDTOCHAN(server, channel) (":" + server + " 404 " + channel + " :Cannot send to channel")
 #define ERR_UNKNOWNCOMMAND(server, command) (":" + server + " 421 " + command + " :Unknown command")
 #define ERR_NONICKNAMEGIVEN(server) (":" + server + " 431 * :No nickname given")
 #define ERR_ERRONEUSNICKNAME(server, nick) (":" + server + " 432 " + nick + " :Erroneous nickname")
 #define ERR_NICKNAMEINUSE(server, nick) (":" + server + " 433 " + nick + " :Nickname already in use")
-#define ERR_USERNOTINCHANNEL(server, nick, channel) (":" + server + " 441 " + nick + channel " :They aren't on that channel")
+#define ERR_USERNOTINCHANNEL(server, nick, channel) (":" + server + " 441 " + nick + " " + channel + " :They aren't on that channel")
 #define ERR_NOTONCHANNEL(server, channel) (":" + server + " 442 " + channel + " :You're not on that channel")
 #define ERR_NOTREGISTERED(server) (":" + server + " 451 :You have not registered")
 #define ERR_NEEDMOREPARAMS(server, command) (":" + server + " 461 " + command + " :Not enough parameters")
