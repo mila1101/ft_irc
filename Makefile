@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: msoklova <msoklova@student.42heilbronn.    +#+  +:+       +#+         #
+#    By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/12 17:38:35 by eahn              #+#    #+#              #
-#    Updated: 2025/04/15 16:00:38 by msoklova         ###   ########.fr        #
+#    Updated: 2025/04/22 15:25:47 by eahn             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,29 +15,50 @@ CFLAGS = -Wall -Wextra -Werror -std=c++17 -I.
 
 NAME = ircserv
 
-SRC_DIR = ./core/
+CLIENT_DIR = ./client/
+COMMANDS_DIR = ./commands/
+CORE_DIR = ./core/
 UTILS_DIR = ./utils/
 OBJ_DIR = ./obj/
 
-SRCS = Server.cpp SocketHandler.cpp
-UTIL_SRCS = Logger.cpp
+CLIENT_SRCS = Client.cpp
+COMMANDS_SRCS = CommandHandler.cpp
+CORE_SRCS = Server.cpp SocketHandler.cpp
+UTILS_SRCS = InputParser.cpp Logger.cpp
 
-NEW_SRCS = $(addprefix $(SRC_DIR), $(SRCS)) $(addprefix $(UTILS_DIR), $(UTIL_SRCS))
-OBJS = $(addprefix $(OBJ_DIR), $(SRCS:.cpp=.o)) $(addprefix $(OBJ_DIR), $(UTIL_SRCS:.cpp=.o))
+# Full paths to sources
+SRCS = $(addprefix $(CLIENT_DIR), $(CLIENT_SRCS)) \
+       $(addprefix $(COMMANDS_DIR), $(COMMANDS_SRCS)) \
+       $(addprefix $(CORE_DIR), $(CORE_SRCS)) \
+       $(addprefix $(UTILS_DIR), $(UTILS_SRCS))
 
+
+# Object files mapped to OBJ_DIR
+OBJS = $(addprefix $(OBJ_DIR), $(SRCS:.cpp=.o))
+
+# Replace directory prefix to obj/
+# (e.g., ./core/Server.cpp → ./obj/core/Server.o)
+OBJ_PATHS = $(patsubst %.cpp, $(OBJ_DIR)%.o, $(SRCS))
+
+# Default target
 all: $(NAME)
 
+# Create object directories
 $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)
+	@mkdir -p $(OBJ_DIR)client
+	@mkdir -p $(OBJ_DIR)commands
+	@mkdir -p $(OBJ_DIR)core
+	@mkdir -p $(OBJ_DIR)utils
 
-$(OBJ_DIR)%.o: $(SRC_DIR)%.cpp | $(OBJ_DIR)
+# Rule for compiling each .cpp to .o
+$(OBJ_DIR)%.o: %.cpp | $(OBJ_DIR)
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(OBJ_DIR)%.o: $(UTILS_DIR)%.cpp | $(OBJ_DIR)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-$(NAME): $(OBJ_DIR) $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
+# Link all objects to create executable
+$(NAME): $(OBJ_PATHS)
+	$(CC) $(CFLAGS) $(OBJ_PATHS) -o
 
 clean:
 	@rm -f $(OBJS)
