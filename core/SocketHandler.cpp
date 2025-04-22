@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SocketHandler.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
+/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 23:03:14 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/22 16:46:08 by msoklova         ###   ########.fr       */
+/*   Updated: 2025/04/22 17:05:48 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,8 +60,17 @@ void SocketHandler::receiveMessage(int clientFd)
 	std::string message(buffer);
 	Logger::log(LogLevel::Privmsg, "Message from fd " + std::to_string(clientFd) + ": " + message);
 
-	ParsedCommand parsed = InputParser::parse(message);
-    commandHandler_.dispatch(clientFd, parsed);
+	std::stringstream ss(message);
+    std::string line;
+    while (std::getline(ss, line)) {
+        if (!line.empty() && line.back() == '\r')
+            line.pop_back();
+
+        if (line.empty()) continue;
+
+        ParsedCommand parsed = InputParser::parse(line);
+        commandHandler_.dispatch(clientFd, parsed);
+    }
 }
 
 void SocketHandler::addClientSocket(int clientFd)
