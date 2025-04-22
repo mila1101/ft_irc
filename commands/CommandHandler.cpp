@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
+/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:33:36 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/22 16:48:07 by msoklova         ###   ########.fr       */
+/*   Updated: 2025/04/22 16:58:21 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 CommandHandler::CommandHandler(Server &server) : server_(server)
 {
 	addCommand("CAP", &CommandHandler::cmdCap);
+	addCommand("PASS", &CommandHandler::cmdPass);
 	addCommand("NICK", &CommandHandler::cmdNick);
 	addCommand("USER", &CommandHandler::cmdUser);
 	addCommand("JOIN", &CommandHandler::cmdJoin);
@@ -69,6 +70,37 @@ void CommandHandler::cmdCap(int clientFd, const std::vector<std::string>& params
         return;
     }
 }
+
+void CommandHandler::cmdPass(int fd, const std::vector<std::string>& params)
+{
+    std::map<int, Client>& clients = server_.getClients();
+    if (clients.find(fd) == clients.end())
+        return;
+
+    Client& client = clients[fd];
+
+    if (client.isRegistered())
+    {
+        server_.msgClient(fd, "462 :You may not reregister");
+        return;
+    }
+
+    if (params.empty())
+    {
+        server_.msgClient(fd, "461 PASS :Not enough parameters");
+        return;
+    }
+
+    if (params[0] != server_.getPassword())
+    {
+        server_.msgClient(fd, "464 :Password incorrect");
+        return;
+    }
+
+    client.setPasswordVerified(true);
+    Logger::info("Password verified for fd=" + std::to_string(fd));
+}
+
 
 // To do:
 // getClients() done
@@ -184,11 +216,11 @@ void CommandHandler::cmdUser(int fd, const std::vector<std::string>& params)
     client.setUserName(username);
     client.setRealName(realname);
 
-    if (!client.getNickName().empty())
-    {
-        client.setRegistered(true);
-        server_.sendWelcome(fd, client); //tbd
-    }
+	if (!client.getNickName().empty() && client.isPasswordVerified())
+	{
+		client.setRegistered(true);
+		server_.sendWelcome(fd, client);
+	}
 }
 
 void CommandHandler::cmdJoin(int fd, const std::vector<std::string>& params)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
+/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 16:05:10 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/22 16:50:34 by msoklova         ###   ########.fr       */
+/*   Updated: 2025/04/22 16:58:56 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -208,6 +208,10 @@ void Server::msgClient(int clientSocket, const std::string& msg)
 std::string Server::getIP() const
 {
 	return serverIp_;
+}
+
+const std::string& Server::getPassword() const {
+    return password_;
 }
 
 std::string Server::getServerName() const {
