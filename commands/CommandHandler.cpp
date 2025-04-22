@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:33:36 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/21 22:35:42 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/22 11:50:12 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ void CommandHandler::dispatch(int clientFd, const ParsedCommand& cmd)
 // getIP() done
 // getNickName()
 // setNickName()
-// getMembers() 
+// getMembers()
 // isMember()
 // isLoggedIn()
 void CommandHandler::cmdNick(int clientFd, const std::vector<std::string>& params)
@@ -167,10 +167,10 @@ void CommandHandler::cmdUser(int fd, const std::vector<std::string>& params)
     std::string realname = params[3];
     if (!realname.empty() && realname[0] == ':')
         realname = realname.substr(1);
-    client.setUsername(username);
-    client.setRealname(realname);
+    client.setUserName(username);
+    client.setRealName(realname);
 
-    if (!client.getNickname().empty())
+    if (!client.getNickName().empty())
     {
         client.setRegistered(true);
         server_.sendWelcome(clientFd, client); //tbd
@@ -189,7 +189,7 @@ void CommandHandler::cmdJoin(int fd, const std::vector<std::string>& params)
 
     if (channelName[0] != '#')
         channelName = "#" + channelName;
-    
+
     //Create channel
     if (server_.getChannels().find(channelName) == server_.getChannels().end())
     {
@@ -232,7 +232,7 @@ void CommandHandler::cmdJoin(int fd, const std::vector<std::string>& params)
         server_.msgClient(fd, RPL_NOTOPIC(server_.getIP(), server_.getClient(fd).getNickName(), channelName));
     else
         server_.msgClient(fd, RPL_TOPIC(server_.getIP(), server_.getClient(fd).getNickName(), channelName, channel.getTopic()));
-    Logger::info("Client " + server_.getClient(fd).getNickname() + " joined channel " + channelName);
+    Logger::info("Client " + server_.getClient(fd).getNickName() + " joined channel " + channelName);
 }
 
 void CommandHandler::cmdMsg(int fd, const std::vector<std::string>& params)
@@ -245,7 +245,7 @@ void CommandHandler::cmdMsg(int fd, const std::vector<std::string>& params)
     }
     std::string recipient = params[0];
     std::string message;
-    
+
     for (size_t i = 1; i < params.size(); ++i)
     {
         message += params[i];
@@ -305,7 +305,7 @@ void CommandHandler::cmdMsg(int fd, const std::vector<std::string>& params)
         // oss << "]";
 
         // Logger::log(LogLevel::Channel, oss.str());
-        
+
         Logger::info("Message sent from " + senderNick + " to channel " + recipient + ": " + message);
     }
     else
@@ -439,7 +439,7 @@ void CommandHandler::cmdTopic(int fd, const std::vector<std::string>& params)
             server_.msgClient(fd, RPL_TOPIC(server_.getIP(), nick, channelName, currentTopic));
     }
 
-    if (channel.isTopicRestricted() && !channel.isOperator(fd))
+    if (channel.isTopicRestriction() && !channel.isOperator(fd))
     {
         server_.msgClient(fd, ERR_CHANOPRIVISNEEDED(server_.getIP(), channelName));
         return;
@@ -567,7 +567,7 @@ void CommandHandler::cmdPart(int fd, const std::vector<std::string>& params)
     std::string channelName = params[0];
     if (channelName[0] != '#')
         channelName = "#" + channelName;
-    
+
     std::map<std::string, Channel>& channels = server_.getChannels();
     std::map<std::string, Channel>::iterator it = channels.find(channelName);
 
