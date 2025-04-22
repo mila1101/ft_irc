@@ -6,7 +6,6 @@
 /*   By: smiranda <smiranda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:33:36 by eahn              #+#    #+#             */
-
 /*   Updated: 2025/04/22 14:46:31 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
@@ -575,7 +574,7 @@ void CommandHandler::cmdInvite(int fd, const std::vector<std::string>& params)
     }
 
     // Add invite to channel's invite list
-    channel.addInvite(targetFd);
+    channel.invite(targetFd);
 
     const Client& inviter = server_.getClient(fd);
     const Client& invitee = server_.getClient(targetFd);
