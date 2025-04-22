@@ -6,7 +6,7 @@
 /*   By: smiranda <smiranda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:33:36 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/22 12:12:08 by smiranda         ###   ########.fr       */
+/*   Updated: 2025/04/22 15:06:41 by smiranda         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -457,7 +457,52 @@ void CommandHandler::cmdKick(int fd, const std::vector<std::string>& params)
 
 void CommandHandler::cmdInvite(int fd, const std::vector<std::string>& params)
 {
+    if (params.size() < 2)
+    {
+        server_.msgClient(fd, ERR_NEEDMOREPARAMS(server_.getIP(), "INVITE"));
+        Logger::warning("INVITE: Not enough parameters from fd=" + std::to_string(fd));
+        return;
+    }
 
+    const std::string& recipientNick = params[0];
+    const std::string& channelName = params[1];
+
+    std::map<std::string, Channel>& channels = server_.getChannels();
+    if (channels.find(channelName) == channels.end())
+    {
+        server_.msgClient(fd, ERR_NOSUCHCHANNEL(server_.getIP(), channelName));
+        return;
+    }
+
+    Channel& channel = channels[channelName];
+    if (!channel.isMember(fd))
+    {
+        server_.msgClient(fd, ERR_NOTONCHANNEL(server_.getIP(), channelName));
+        return;
+    }
+
+    int targetFd = server_.getClientFdByNickName(recipientNick);
+    if (targetFd == -1)
+    {
+        server_.msgClient(fd, ERR_NOSUCHNICK(server_.getIP(), recipientNick));
+        return;
+    }
+
+    // Add invite to channel's invite list
+    channel.addInvite(targetFd);
+
+    const Client& inviter = server_.getClient(fd);
+    const Client& invitee = server_.getClient(targetFd);
+
+    std::string userhost = RPL_USERHOST(inviter.getNickName(), inviter.getUserName(), server_.getIP());
+
+    // Notify the invited user
+    server_.msgClient(targetFd, RPL_INVITE(server_.getIP(), inviter.getNickName(), recipientNick, channelName));
+
+    // Confirm to the inviter
+    server_.msgClient(fd, RPL_INVITEFORMAT(userhost, recipientNick, channelName));
+
+    Logger::info("INVITE: " + inviter.getNickName() + " invited " + recipientNick + " to " + channelName);
 }
 
 void CommandHandler::cmdMode(int fd, const std::vector<std::string>& params)
