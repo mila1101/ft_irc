@@ -6,7 +6,7 @@
 /*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 16:05:12 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/21 21:50:41 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/22 12:11:46 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@ class Server
 
         // Getters
         std::string getIP() const;
+        std::string getServerName() const;
 
         Client& getClient(int fd);
         std::map<int, Client>& getClients();
@@ -76,6 +77,7 @@ class Server
 
         // Core data
         std::string serverIp_;
+        std::string serverName_;
         std::map<int, Client> clients_;
         std::map<std::string, Channel> channels_;
         

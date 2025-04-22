@@ -6,7 +6,7 @@
 /*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 16:05:10 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/21 21:58:37 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/22 12:12:01 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,8 @@ Server::Server (int port, const std::string& password)
         serverIp_ = std::string(hostBuffer);
     else
         serverIp_ = "127.0.0.1"; // fallback for safety
+	
+	serverName_ = serverIp_;
 
 	setupPoll();
 
@@ -206,6 +208,10 @@ void Server::msgClient(int clientSocket, const std::string& msg)
 std::string Server::getIP() const
 {
 	return serverIp_;
+}
+
+std::string Server::getServerName() const {
+    return serverName_;
 }
 
 Client& Server::getClient(int fd)
