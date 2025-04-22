@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
+/*   By: smiranda <smiranda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:33:36 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/22 12:02:44 by msoklova         ###   ########.fr       */
+/*   Updated: 2025/04/22 12:12:08 by smiranda         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,19 +148,19 @@ void CommandHandler::cmdUser(int fd, const std::vector<std::string>& params)
 {
     std::map<int, Client>& clients = server_.getClients(); //tbd
 
-    if (clients.find(clientFd) == clients.end())
+    if (clients.find(fd) == clients.end())
         return;
 
-    Client& client = clients[clientFd];
+    Client& client = clients[fd];
     if (client.isRegistered()) //tbd
     {
-        server_.msgClient(clientFd, ERR_ALREADYREGISTRED(client.getNickName()));
+        server_.msgClient(fd, ERR_ALREADYREGISTRED(client.getNickName()));
         return;
     }
 
     if (params.size() < 4)
     {
-        server_.msgClient(clientFd, ERR_NEEDMOREPARAMS(client.getNickName(), "USER"));
+        server_.msgClient(fd, ERR_NEEDMOREPARAMS(client.getNickName(), "USER"));
         return;
     }
     std::string username = params[0];
@@ -173,7 +173,7 @@ void CommandHandler::cmdUser(int fd, const std::vector<std::string>& params)
     if (!client.getNickName().empty())
     {
         client.setRegistered(true);
-        server_.sendWelcome(clientFd, client); //tbd
+        server_.sendWelcome(fd, client); //tbd
     }
 }
 
@@ -276,12 +276,6 @@ void CommandHandler::cmdMsg(int fd, const std::vector<std::string>& params)
         if (!channel.isMember(fd))
         {
             server_.msgClient(fd, ERR_CANNOTSENDTOCHAN(server_.getIP(), recipient));
-            return;
-        }
-        if (server_.getBot() && !message.empty() && message[0] == '!')
-        {
-            Logger::info("Bot called by " + senderNick + " in channel " + recipient);
-            server_.getBot()->executeCommand(server_, fd, recipient, message.substr(1));
             return;
         }
         std::string privmsg = RPL_PRIVMSG(server_.getIP(), senderNick, recipient, message);
