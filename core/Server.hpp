@@ -6,7 +6,7 @@
 /*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 16:05:12 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/21 21:50:41 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/22 15:02:24 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,9 +49,12 @@ class Server
 
         // Getters
         std::string getIP() const;
+        std::string getServerName() const;
 
         Client& getClient(int fd);
         std::map<int, Client>& getClients();
+
+        int getClientFdByNickName(const std::string& nick) const;
 
         Channel& getChannel(const std::string& name);
         std::map<std::string, Channel>& getChannels();
@@ -59,7 +62,10 @@ class Server
 
         // Client / Channel management
         void removeClient(int fd);
-        void removeClientFromChannel(int fd, const std::string& channelName);  
+        void removeClientFromChannel(int fd, const std::string& channelName);
+        
+        // Welcome message
+        void sendWelcome(int fd, const Client& client);
 
     private:
         // Network state
@@ -76,6 +82,7 @@ class Server
 
         // Core data
         std::string serverIp_;
+        std::string serverName_;
         std::map<int, Client> clients_;
         std::map<std::string, Channel> channels_;
         

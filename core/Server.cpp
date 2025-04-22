@@ -6,7 +6,7 @@
 /*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 16:05:10 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/21 21:58:37 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/22 15:02:32 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,8 @@ Server::Server (int port, const std::string& password)
         serverIp_ = std::string(hostBuffer);
     else
         serverIp_ = "127.0.0.1"; // fallback for safety
+	
+	serverName_ = serverIp_;
 
 	setupPoll();
 
@@ -208,6 +210,10 @@ std::string Server::getIP() const
 	return serverIp_;
 }
 
+std::string Server::getServerName() const {
+    return serverName_;
+}
+
 Client& Server::getClient(int fd)
 {
 	return clients_.at(fd);
@@ -251,4 +257,33 @@ void Server::removeClientFromChannel(int fd, const std::string& channelName)
 			channels_.erase(it); // Remove channel if empty
 	}
 
+}
+
+void Server::sendWelcome(int fd, const Client& client)
+{
+	std::string nick = client.getNickName();
+	std::string serverName = getServerName(); 
+
+	std::string welcome = ":" + serverName + " 001 " + nick + " :Welcome to the IRC server!\r\n";
+	std::string yourHost = ":" + serverName + " 002 " + nick + " :Your host is " + serverName + ", runnig version 1.0\r\n";
+	std::string created = ":" + serverName + " 003 " + nick + " :This server was created just now\r\n";
+	std::string myInfo = ":" + serverName + " 004 " + nick + " " + serverName + " v1.0 iotl\r\n";
+	
+	msgClient(fd, welcome);
+	msgClient(fd, yourHost);
+	msgClient(fd, created);
+	msgClient(fd, myInfo);
+
+	Logger::info("Welcome sequence sent to " + nick);
+}
+
+
+int Server::getClientFdByNickName(const std::string& nick) const
+{
+    for (std::map<int, Client>::const_iterator it = clients_.begin(); it != clients_.end(); ++it)
+    {
+        if (it->second.getNickName() == nick)
+            return it->first;  // return fd
+    }
+    return -1;  // not found
 }
