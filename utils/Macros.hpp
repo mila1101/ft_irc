@@ -6,7 +6,7 @@
 /*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 14:12:09 by smiranda          #+#    #+#             */
-/*   Updated: 2025/04/22 12:12:29 by msoklova         ###   ########.fr       */
+/*   Updated: 2025/04/22 15:13:55 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,3 +51,6 @@
 #define RPL_TOPIC(server, nick, channel, topic) (":" + server + " 332 " + nick + " " + channel + " :" + topic)
 #define RPL_PRIVMSG(server, sender, recipient, message) (":" + sender + "!" + sender + "@" + server + " PRIVMSG " + recipient + " :" + message)
 #define RPL_PRIVMSGFORMAT(sender, recipient, message) (":" + sender + " PRIVMSG " + recipient + " :" + message)
+#define RPL_USERHOST(nick, user, server) (nick + "!" + user + "@" + server)
+#define RPL_INVITE(server, sender, target, channel) (":" + server + " 341 " + sender + " " + target + " " + channel)
+#define RPL_INVITEFORMAT(userhost, target, channel) (":" + userhost + " INVITE " + target + " " + channel)

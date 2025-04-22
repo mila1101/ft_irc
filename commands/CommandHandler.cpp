@@ -575,7 +575,7 @@ void CommandHandler::cmdInvite(int fd, const std::vector<std::string>& params)
     }
 
     // Add invite to channel's invite list
-    channel.addInvite(targetFd);
+    channel.invite(targetFd);
 
     const Client& inviter = server_.getClient(fd);
     const Client& invitee = server_.getClient(targetFd);
