@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandHandler.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
+/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:33:34 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/22 15:36:04 by msoklova         ###   ########.fr       */
+/*   Updated: 2025/04/22 15:41:08 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,14 +26,14 @@
 class CommandHandler
 {
 	public:
-  		CommandHandler(Server &server, std::map<int, Client>& clients);
+  		CommandHandler(Server &server);
     	~CommandHandler();
 
 		void dispatch(int clientFd, const ParsedCommand& command);
 
 	private:
 		Server& server_;
-		std::map<int, Client>& clients_;
+		// std::map<int, Client>& clients_;
 		// command string -> handler function
     	typedef void (CommandHandler::*CommandFunc)(int, const std::vector<std::string>&);
     	std::map<std::string, std::function<void(int, const std::vector<std::string>&)> > commandTable;

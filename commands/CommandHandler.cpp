@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
+/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:33:36 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/22 15:36:01 by msoklova         ###   ########.fr       */
+/*   Updated: 2025/04/22 15:41:01 by eahn             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include "../client/Client.hpp"
 #include <iostream>
 
-CommandHandler::CommandHandler(Server &server, std::map<int, Client>& clients) : server_(server), clients_(clients)
+CommandHandler::CommandHandler(Server &server) : server_(server)
 {
 	addCommand("NICK", &CommandHandler::cmdNick);
 	addCommand("USER", &CommandHandler::cmdUser);
