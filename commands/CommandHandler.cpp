@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smiranda <smiranda@student.42.fr>          +#+  +:+       +#+        */
+/*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:33:36 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/22 14:46:31 by msoklova         ###   ########.fr       */
+/*   Updated: 2025/04/22 15:36:01 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -370,6 +370,7 @@ void CommandHandler::cmdPing(int fd, const std::vector<std::string>& params)
 
 void CommandHandler::cmdPong(int fd, const std::vector<std::string>& params)
 {
+	(void)params;
 	std::map<int, Client>& clients = server_.getClients();
 
 	auto it = clients.find(fd);
@@ -577,7 +578,7 @@ void CommandHandler::cmdInvite(int fd, const std::vector<std::string>& params)
     channel.invite(targetFd);
 
     const Client& inviter = server_.getClient(fd);
-    const Client& invitee = server_.getClient(targetFd);
+    //const Client& invitee = server_.getClient(targetFd);
 
     std::string userhost = RPL_USERHOST(inviter.getNickName(), inviter.getUserName(), server_.getIP());
 

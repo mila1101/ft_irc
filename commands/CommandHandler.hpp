@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandHandler.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smiranda <smiranda@student.42.fr>          +#+  +:+       +#+        */
+/*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:33:34 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/18 12:32:01 by smiranda         ###   ########.fr       */
+/*   Updated: 2025/04/22 15:36:04 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <functional> 
+#include <functional>
 #include <regex>
 #include "../utils/InputParser.hpp" // for ParsedCommand
 #include "../utils/Macros.hpp" // for error messages
@@ -54,5 +54,5 @@ class CommandHandler
 		void cmdInvite(int clientFd, const std::vector<std::string>& params);
 		void cmdMode(int clientFd, const std::vector<std::string>& params);
 		void cmdPart(int clientFd, const std::vector<std::string>& params);
-		
+
 };

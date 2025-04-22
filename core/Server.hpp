@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 16:05:12 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/22 15:02:24 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/22 15:29:35 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,8 +45,8 @@ class Server
         void stop();
 
         // Send to client
-        void Server::msgClient(int clientSocket, const std::string & msg);
-
+        void msgClient(int clientSocket, const std::string & msg);
+        
         // Getters
         std::string getIP() const;
         std::string getServerName() const;
@@ -63,7 +63,7 @@ class Server
         // Client / Channel management
         void removeClient(int fd);
         void removeClientFromChannel(int fd, const std::string& channelName);
-        
+
         // Welcome message
         void sendWelcome(int fd, const Client& client);
 
@@ -85,7 +85,7 @@ class Server
         std::string serverName_;
         std::map<int, Client> clients_;
         std::map<std::string, Channel> channels_;
-        
+
         // Internal helpers
         bool initSocket(); // Init server socket
         void setupPoll(); // Init pollFds
@@ -93,7 +93,7 @@ class Server
         void handleIncomingConnection(); // When event on server socket
         void handleClientMessage(int fd); // When event on client socket
 
-        // Signal handling  
+        // Signal handling
         void setupSignalHandler(); // Setup signal handler
         static void handleSignal(int signal); // static handler
         static Server* instance_; // Singleton pointer so that signal handler can access instance

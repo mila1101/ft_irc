@@ -6,7 +6,7 @@
 /*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 14:12:09 by smiranda          #+#    #+#             */
-/*   Updated: 2025/04/22 15:13:55 by msoklova         ###   ########.fr       */
+/*   Updated: 2025/04/22 15:28:13 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@
 #define ERR_UMODEUNKNOWNFLAG(server) (":" + server + " 501 :Unknown MODE flag")
 #define ERR_NOORIGIN(server) (":" + server + " 409 :No origin specified")
 #define ERR_NOTEXTTOSEND(server) (":" + server + " 412 :No text to send")
-#define ERR_NOSUCHCHANNEL(server, channel) (":" + server + " 403 " + channel + " :No such channel")
+//#define ERR_NOSUCHCHANNEL(server, channel) (":" + server + " 403 " + channel + " :No such channel")
 
 //Messaging
 #define RPL_JOIN(server, nick, channel) (":" + nick + "!" + nick + "@" + server + " JOIN " + channel)
