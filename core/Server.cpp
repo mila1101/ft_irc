@@ -28,10 +28,11 @@ Server::Server (int port, const std::string& password)
 		throw std::runtime_error("Failed to initialize server socket");
 
 	char hostBuffer[256];
-    if (gethostname(hostBuffer, sizeof(hostBuffer)) == 0)
-        serverIp_ = std::string(hostBuffer);
-    else
-        serverIp_ = "127.0.0.1"; // fallback for safety
+	if (gethostname(hostBuffer, sizeof(hostBuffer)) == 0) {
+		serverIp_ = std::string(hostBuffer);
+	} else {
+		serverIp_ = "127.0.0.1";
+	}
 
 	serverName_ = serverIp_;
 
@@ -158,7 +159,7 @@ void Server::setupPoll()
 
 void Server::pollLoop()
 {
-	int ready = poll(pollFds_.data(), pollFds_.size(), -1);
+	int ready = poll(pollFds_.data(), pollFds_.size(), 1000); // changed from -1 to 1000, pingpong works but there is segfault
 	if (ready < 0)
 	{
 		Logger::error ("Poll error");
@@ -181,6 +182,7 @@ void Server::pollLoop()
 			}
 		}
 	}
+	checkClientHeartbeats();
 }
 
 void Server::handleIncomingConnection()
@@ -339,4 +341,36 @@ int Server::getClientFdByNickName(const std::string& nick) const
             return it->first;  // return fd
     }
     return -1;  // not found
+}
+
+void Server::checkClientHeartbeats() {
+	// auto now = std::chrono::system_clock::now();
+
+	for (auto it = clients_.begin(); it != clients_.end();)
+	{
+		Client& client = it->second;
+
+		// Check if the client needs a PING
+		if (client.needsPing())
+		{
+			std::string pingMsg = "PING :" + serverName_;
+			msgClient(client.getSocket(), pingMsg);
+			client.setPingSent();
+			Logger::log(LogLevel::Ping, "Sent PING to client fd=" + std::to_string(client.getSocket()));
+		}
+
+		// Check if the client has timed out
+		if (client.hasTimedOut())
+		{
+			Logger::warning("Client fd=" + std::to_string(client.getSocket()) + " timed out");
+			int fd = client.getSocket();
+			++it;
+			
+			removeClient(fd);
+		}
+		else
+		{
+			++it;
+		}
+	}
 }

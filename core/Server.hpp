@@ -94,7 +94,8 @@ class Server
         void pollLoop();
         void handleIncomingConnection(); // When event on server socket
         void handleClientMessage(int fd); // When event on client socket
-
+        void checkClientHeartbeats(); // Check if clients are alive
+        
         // Signal handling
         void setupSignalHandler(); // Setup signal handler
         static void handleSignal(int signal); // static handler
