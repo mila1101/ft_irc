@@ -17,6 +17,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <algorithm>
 
 // To store parsed command and its parameters
 struct ParsedCommand

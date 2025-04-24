@@ -101,7 +101,7 @@ bool Client::needsPing() const
 
 	auto now = std::chrono::system_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::seconds>(now - lastPong_).count();
-	return duration >= 120;
+	return duration >= 30;
 }
 
 bool Client::hasTimedOut() const
@@ -112,5 +112,5 @@ bool Client::hasTimedOut() const
 
 	auto now = std::chrono::system_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::seconds>(now - lastPing_).count();
-	return duration >= 60;
+	return duration >= 120;
 }
