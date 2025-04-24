@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 16:05:10 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/22 16:58:56 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/24 17:48:11 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -246,21 +246,70 @@ Channel& Server::getOrCreateChannel(const std::string& name)
 	return channels_.at(name);
 }
 
-void Server::removeClient(int fd)
-{
+//void Server::removeClient(int fd)
+//{
+//	clients_.erase(fd);
+//}
+
+void Server::removeClient(int fd) {
+	// First, check if client exists
+	auto clientIt = clients_.find(fd);
+	if (clientIt == clients_.end()) {
+		Logger::warning("Attempted to remove non-existent client fd=" + std::to_string(fd));
+		return;
+	}
+
+	Client& client = clientIt->second;
+	std::string nickname = client.getNickName();
+
+	// Remove from all channels
+	std::map<std::string, Channel> channelsCopy = channels_; // Make copy to avoid iterator invalidation
+	for (const auto& channelPair : channelsCopy) {
+		if (channelPair.second.isMember(fd)) {
+			removeClientFromChannel(fd, channelPair.first);
+		}
+	}
+
+	// Now remove from clients map
 	clients_.erase(fd);
+
+	// Close socket (should trigger SocketHandler::disconnectClient)
+	close(fd);
+
+	Logger::info("Client " + nickname + " (fd=" + std::to_string(fd) + ") fully removed from server");
 }
+
+//void Server::removeClientFromChannel(int fd, const std::string& channelName)
+//{
+//	std::map<std::string, Channel>::iterator it = channels_.find(channelName);
+//	if (it != channels_.end())
+//	{
+//		it->second.removeMember(fd); // To check with Mila
+//		if (it->second.isEmpty()) // To check with Mila
+//			channels_.erase(it); // Remove channel if empty
+//	}
+
+//}
 
 void Server::removeClientFromChannel(int fd, const std::string& channelName)
 {
 	std::map<std::string, Channel>::iterator it = channels_.find(channelName);
 	if (it != channels_.end())
 	{
-		it->second.removeMember(fd); // To check with Mila
-		if (it->second.isEmpty()) // To check with Mila
-			channels_.erase(it); // Remove channel if empty
-	}
+		// First check if client is in the channel
+		if (it->second.isMember(fd))
+		{
+			// Remove client from the channel
+			it->second.removeMember(fd);
 
+			// Check if channel is now empty and should be removed
+			if (it->second.isEmpty())
+			{
+				Logger::info("Channel " + channelName + " is now empty, removing it");
+				channels_.erase(it);
+			}
+		}
+	}
 }
 
 void Server::sendWelcome(int fd, const Client& client)

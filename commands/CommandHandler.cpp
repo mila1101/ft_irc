@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:33:36 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/22 16:58:21 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/24 17:59:23 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,25 +101,15 @@ void CommandHandler::cmdPass(int fd, const std::vector<std::string>& params)
     Logger::info("Password verified for fd=" + std::to_string(fd));
 }
 
-
-// To do:
-// getClients() done
-// getChannels()done
-// getIP() done
-// getNickName()
-// setNickName()
-// getMembers()
-// isMember()
-// isLoggedIn()
 void CommandHandler::cmdNick(int clientFd, const std::vector<std::string>& params)
 {
-	std::map<int, Client>& clients = server_.getClients(); //getClients tbd
-	const std::map<std::string, Channel>& channels = server_.getChannels(); //getChannels tbd
+	std::map<int, Client>& clients = server_.getClients();
+	const std::map<std::string, Channel>& channels = server_.getChannels();
 
 	if (params.empty())
 	{
 		Logger::warning("NICK: no nickname provided from fd=" + std::to_string(clientFd));
-		server_.msgClient(clientFd, ERR_NONICKNAMEGIVEN(server_.getIP())); //getIP tbd
+		server_.msgClient(clientFd, ERR_NONICKNAMEGIVEN(server_.getIP()));
 		return;
 	}
 	std::string newNick = params[0];
@@ -172,33 +162,16 @@ void CommandHandler::cmdNick(int clientFd, const std::vector<std::string>& param
 	}
 }
 
-/**
- * ✨ Tips for Siria
-All handlers follow the same pattern:
-	- Validate params
-	- Possibly interact with ClientManager or ChannelManager
-	- Respond with send(fd, message...)
-All IRC responses must end with \r\n (per IRC protocol)
-Use Logger::log(...) for colored, categorized logs (Info, Warning, Error, etc.)
- */
 
-
-// To do getters and setters
-// getClients()
-// getNickName()
-// setUserName()
-// setRealName()
-// setLoggedIn()
-// sendWelcome()
 void CommandHandler::cmdUser(int fd, const std::vector<std::string>& params)
 {
-    std::map<int, Client>& clients = server_.getClients(); //tbd
+    std::map<int, Client>& clients = server_.getClients();
 
     if (clients.find(fd) == clients.end())
         return;
 
     Client& client = clients[fd];
-    if (client.isRegistered()) //tbd
+    if (client.isRegistered())
     {
         server_.msgClient(fd, ERR_ALREADYREGISTRED(client.getNickName()));
         return;
@@ -331,22 +304,8 @@ void CommandHandler::cmdMsg(int fd, const std::vector<std::string>& params)
             if (*it != fd)
                 server_.msgClient(*it, privmsg);
         }
-        //Log message
-        // std::ostringstream oss;
-        // oss << "Message sent on channel [" << recipient << "] Users in channel: [";
 
-        // bool first = true;
-        // for (int memberSocket : channel.getMembers())
-        // {
-        //     if (!first) oss << ", ";
-        //     oss << server_.getClient(memberSocket).getNickName();
-        //     first = false;
-        // }
-        // oss << "]";
-
-        // Logger::log(LogLevel::Channel, oss.str());
-
-        Logger::info("Message sent from " + senderNick + " to channel " + recipient + ": " + message);
+        Logger::info("Message sent from " + senderNick + " to channel " + recipient);
     }
     else
     {
@@ -362,29 +321,57 @@ void CommandHandler::cmdMsg(int fd, const std::vector<std::string>& params)
     }
 }
 
-// To do:
-// getClient()
-// getNickName()
-// getUserName()
-// getChannels()
-// isMember()
-// getMembers()
-// removeClientFromChannel() --> Remove user from the channel
-// removeClient() --> Close socket and cleanup
+//void CommandHandler::cmdQuit(int fd, const std::vector<std::string>& params)
+//{
+//	Client& client = server_.getClient(fd);
+//	std::string quitMsg = (params.empty()) ? "Client Quit" : params[0];
+//	std::string fullQuitMsg = ":" + client.getNickName() + "!" + client.getUserName() + "@localhost QUIT :" + quitMsg + "\r\n";
+
+//	std::set<int> notifiedClients;
+//	for (const auto& channelPair : server_.getChannels())
+//	{
+//		const Channel& channel = channelPair.second;
+//		if (channel.isMember(fd))
+//		{
+//			for (int memberFd : channel.getMembers())
+//			{
+//				if (notifiedClients.insert(memberFd).second && memberFd != fd)
+//				{
+//					server_.msgClient(memberFd, fullQuitMsg);
+//				}
+//			}
+//			server_.removeClientFromChannel(fd, channelPair.first);
+//		}
+//	}
+//	Logger::info("Client with fd=" + std::to_string(fd) + " quit: " + quitMsg);
+//	server_.msgClient(fd, fullQuitMsg);
+//	server_.removeClient(fd);
+//}
 
 void CommandHandler::cmdQuit(int fd, const std::vector<std::string>& params)
 {
+	// First check if client exists
+	if (server_.getClients().find(fd) == server_.getClients().end()) {
+		Logger::warning("QUIT: Client fd=" + std::to_string(fd) + " not found");
+		return;
+	}
+
 	Client& client = server_.getClient(fd);
 	std::string quitMsg = (params.empty()) ? "Client Quit" : params[0];
 	std::string fullQuitMsg = ":" + client.getNickName() + "!" + client.getUserName() + "@localhost QUIT :" + quitMsg + "\r\n";
 
+	// Use a copy of channels to avoid modifying while iterating
+	std::map<std::string, Channel> channelsCopy = server_.getChannels();
 	std::set<int> notifiedClients;
-	for (const auto& channelPair : server_.getChannels())
+
+	for (const auto& channelPair : channelsCopy)
 	{
 		const Channel& channel = channelPair.second;
 		if (channel.isMember(fd))
 		{
-			for (int memberFd : channel.getMembers())
+			// Get a copy of members to avoid iteration issues
+			std::set<int> members = channel.getMembers();
+			for (int memberFd : members)
 			{
 				if (notifiedClients.insert(memberFd).second && memberFd != fd)
 				{
@@ -394,8 +381,9 @@ void CommandHandler::cmdQuit(int fd, const std::vector<std::string>& params)
 			server_.removeClientFromChannel(fd, channelPair.first);
 		}
 	}
+
 	Logger::info("Client with fd=" + std::to_string(fd) + " quit: " + quitMsg);
-	server_.msgClient(fd, fullQuitMsg);
+	//server_.msgClient(fd, fullQuitMsg);
 	server_.removeClient(fd);
 }
 
@@ -620,18 +608,14 @@ void CommandHandler::cmdInvite(int fd, const std::vector<std::string>& params)
         return;
     }
 
-    // Add invite to channel's invite list
     channel.invite(targetFd);
 
     const Client& inviter = server_.getClient(fd);
-    //const Client& invitee = server_.getClient(targetFd);
 
     std::string userhost = RPL_USERHOST(inviter.getNickName(), inviter.getUserName(), server_.getIP());
 
-    // Notify the invited user
     server_.msgClient(targetFd, RPL_INVITE(server_.getIP(), inviter.getNickName(), recipientNick, channelName));
 
-    // Confirm to the inviter
     server_.msgClient(fd, RPL_INVITEFORMAT(userhost, recipientNick, channelName));
 
     Logger::info("INVITE: " + inviter.getNickName() + " invited " + recipientNick + " to " + channelName);
