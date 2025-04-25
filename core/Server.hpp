@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 16:05:12 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/22 16:58:43 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/25 16:06:41 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ class Server
 
         // Send to client
         void msgClient(int clientSocket, const std::string & msg);
-        
+
         // Getters
         std::string getIP() const;
         std::string getServerName() const;
@@ -68,6 +68,7 @@ class Server
 
         // Welcome message
         void sendWelcome(int fd, const Client& client);
+        void asciiArt();
 
     private:
         // Network state
@@ -95,7 +96,7 @@ class Server
         void handleIncomingConnection(); // When event on server socket
         void handleClientMessage(int fd); // When event on client socket
         void checkClientHeartbeats(); // Check if clients are alive
-        
+
         // Signal handling
         void setupSignalHandler(); // Setup signal handler
         static void handleSignal(int signal); // static handler

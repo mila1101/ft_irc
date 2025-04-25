@@ -6,7 +6,7 @@
 /*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 16:05:10 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/25 16:01:59 by msoklova         ###   ########.fr       */
+/*   Updated: 2025/04/25 16:20:38 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,10 +70,16 @@ void Server::handleSignal(int signal)
 	}
 }
 
+void Server::asciiArt()
+{
+    std::cout << R"()" << std::endl;
+}
+
 void Server::run()
 {
 	running_ = true;
 	Logger::info ("Server is running");
+	asciiArt();
 
 	while (running_)
 	{
