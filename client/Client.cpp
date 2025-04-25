@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 17:07:35 by msoklova          #+#    #+#             */
-/*   Updated: 2025/04/22 17:00:20 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/25 15:46:04 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,5 +112,5 @@ bool Client::hasTimedOut() const
 
 	auto now = std::chrono::system_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::seconds>(now - lastPing_).count();
-	return duration >= 120;
+	return duration >= 1200;
 }

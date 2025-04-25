@@ -6,7 +6,7 @@
 /*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 16:05:10 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/24 17:48:11 by msoklova         ###   ########.fr       */
+/*   Updated: 2025/04/25 16:01:59 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -248,11 +248,6 @@ Channel& Server::getOrCreateChannel(const std::string& name)
 	return channels_.at(name);
 }
 
-//void Server::removeClient(int fd)
-//{
-//	clients_.erase(fd);
-//}
-
 void Server::removeClient(int fd) {
 	// First, check if client exists
 	auto clientIt = clients_.find(fd);
@@ -281,18 +276,6 @@ void Server::removeClient(int fd) {
 	Logger::info("Client " + nickname + " (fd=" + std::to_string(fd) + ") fully removed from server");
 }
 
-//void Server::removeClientFromChannel(int fd, const std::string& channelName)
-//{
-//	std::map<std::string, Channel>::iterator it = channels_.find(channelName);
-//	if (it != channels_.end())
-//	{
-//		it->second.removeMember(fd); // To check with Mila
-//		if (it->second.isEmpty()) // To check with Mila
-//			channels_.erase(it); // Remove channel if empty
-//	}
-
-//}
-
 void Server::removeClientFromChannel(int fd, const std::string& channelName)
 {
 	std::map<std::string, Channel>::iterator it = channels_.find(channelName);
@@ -319,10 +302,10 @@ void Server::sendWelcome(int fd, const Client& client)
 	std::string nick = client.getNickName();
 	std::string serverName = getServerName();
 
-	std::string welcome = ":" + serverName + " 001 " + nick + " :Welcome to the IRC server!\r\n";
-	std::string yourHost = ":" + serverName + " 002 " + nick + " :Your host is " + serverName + ", runnig version 1.0\r\n";
-	std::string created = ":" + serverName + " 003 " + nick + " :This server was created just now\r\n";
-	std::string myInfo = ":" + serverName + " 004 " + nick + " " + serverName + " v1.0 iotl\r\n";
+	std::string welcome = ":" + serverName + " 001 " + nick + " :" + COLOR_GREEN + " Welcome to the IRC server!\r" + COLOR_RESET;
+	std::string yourHost = ":" + serverName + " 002 " + nick + " : Your host is " + serverName + ", runnig version 1.0\r";
+	std::string created = ":" + serverName + " 003 " + nick + " : This server was created just now\r";
+	std::string myInfo = ":" + serverName + " 004 " + nick + " " + serverName + " v1.0 iotl\r";
 
 	msgClient(fd, welcome);
 	msgClient(fd, yourHost);
@@ -344,33 +327,25 @@ int Server::getClientFdByNickName(const std::string& nick) const
 }
 
 void Server::checkClientHeartbeats() {
-	// auto now = std::chrono::system_clock::now();
+	std::vector<int> toRemove;
 
-	for (auto it = clients_.begin(); it != clients_.end();)
-	{
+	for (std::map<int, Client>::iterator it = clients_.begin(); it != clients_.end(); ++it) {
+		int fd = it->first;
 		Client& client = it->second;
 
-		// Check if the client needs a PING
-		if (client.needsPing())
-		{
+		if (client.needsPing()) {
 			std::string pingMsg = "PING :" + serverName_;
-			msgClient(client.getSocket(), pingMsg);
+			msgClient(fd, pingMsg);
 			client.setPingSent();
-			Logger::log(LogLevel::Ping, "Sent PING to client fd=" + std::to_string(client.getSocket()));
+			Logger::log(LogLevel::Ping, "Sent PING to client fd=" + std::to_string(fd));
 		}
+		else if (client.hasTimedOut()) {
+			Logger::warning("Client fd=" + std::to_string(fd) + " timed out (no PONG received)");
+			toRemove.push_back(fd);
+		}
+	}
 
-		// Check if the client has timed out
-		if (client.hasTimedOut())
-		{
-			Logger::warning("Client fd=" + std::to_string(client.getSocket()) + " timed out");
-			int fd = client.getSocket();
-			++it;
-			
-			removeClient(fd);
-		}
-		else
-		{
-			++it;
-		}
+	for (size_t i = 0; i < toRemove.size(); ++i) {
+		removeClient(toRemove[i]);
 	}
 }

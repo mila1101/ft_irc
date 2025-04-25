@@ -6,12 +6,12 @@
 #    By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/12 17:38:35 by eahn              #+#    #+#              #
-#    Updated: 2025/04/22 15:46:22 by msoklova         ###   ########.fr        #
+#    Updated: 2025/04/25 15:08:58 by msoklova         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 CC = c++
-CFLAGS = -Wall -Wextra -Werror -std=c++17 -I.
+CFLAGS = -Wall -Wextra -Werror -std=c++17 -I. -g
 
 NAME = ircserv
 

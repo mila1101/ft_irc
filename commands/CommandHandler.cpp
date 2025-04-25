@@ -6,7 +6,7 @@
 /*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:33:36 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/24 17:59:23 by msoklova         ###   ########.fr       */
+/*   Updated: 2025/04/25 15:00:35 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,7 +139,7 @@ void CommandHandler::cmdNick(int clientFd, const std::vector<std::string>& param
 		if (client.isRegistered())
 			userMsg = ":" + oldNick + "!" + client.getUserName() + "@" + server_.getIP();
 		else
-			userMsg = ":" + server_.getIP() + " NICK :" + newNick + "\r\n";
+			userMsg = ":" + server_.getIP() + " NICK :" + newNick + "\r";
 
 		client.setNickName(newNick);
 
