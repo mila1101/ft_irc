@@ -6,7 +6,7 @@
 /*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 17:07:35 by msoklova          #+#    #+#             */
-/*   Updated: 2025/04/25 15:46:04 by msoklova         ###   ########.fr       */
+/*   Updated: 2025/04/26 15:07:41 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,7 @@ bool Client::needsPing() const
 
 	auto now = std::chrono::system_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::seconds>(now - lastPong_).count();
-	return duration >= 30;
+	return duration >= 60;
 }
 
 bool Client::hasTimedOut() const
@@ -112,5 +112,5 @@ bool Client::hasTimedOut() const
 
 	auto now = std::chrono::system_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::seconds>(now - lastPing_).count();
-	return duration >= 1200;
+	return duration >= 120;
 }

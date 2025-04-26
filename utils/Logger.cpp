@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Logger.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 23:30:17 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/15 16:35:08 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/26 13:55:28 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,9 +46,8 @@ void Logger::log (LogLevel level, const std::string& message, bool exitAfter)
 	}
 
 	std::cout << color
-			<< levelStr << ": " << message
-			<< " @ " << timeStream.str()
-			<< RESET << std::endl;
+			<< levelStr << ": " << RESET << message
+			<< " @ " << timeStream.str() << std::endl;
 
 	if (exitAfter)
 		std::exit(1);

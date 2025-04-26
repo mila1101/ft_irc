@@ -6,7 +6,7 @@
 /*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 16:05:10 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/25 17:16:47 by msoklova         ###   ########.fr       */
+/*   Updated: 2025/04/26 13:53:55 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -181,7 +181,7 @@ void Server::setupPoll()
 
 void Server::pollLoop()
 {
-	int ready = poll(pollFds_.data(), pollFds_.size(), 1000); // changed from -1 to 1000, pingpong works but there is segfault
+	int ready = poll(pollFds_.data(), pollFds_.size(), 1000); // changed from -1 to 1000
 	if (ready < 0)
 	{
 		Logger::error ("Poll error");
@@ -282,7 +282,7 @@ void Server::removeClient(int fd) {
 	std::string nickname = client.getNickName();
 
 	// Remove from all channels
-	std::map<std::string, Channel> channelsCopy = channels_; // Make copy to avoid iterator invalidation
+	std::map<std::string, Channel> channelsCopy = channels_;
 	for (const auto& channelPair : channelsCopy) {
 		if (channelPair.second.isMember(fd)) {
 			removeClientFromChannel(fd, channelPair.first);
