@@ -3,15 +3,15 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+         #
+#    By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/12 17:38:35 by eahn              #+#    #+#              #
-#    Updated: 2025/04/25 15:08:58 by msoklova         ###   ########.fr        #
+#    Updated: 2025/04/28 17:46:13 by eahn             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 CC = c++
-CFLAGS = -Wall -Wextra -Werror -std=c++17 -I. -g
+CFLAGS = -Wall -Wextra -Werror -std=c++17 -I.
 
 NAME = ircserv
 
@@ -34,39 +34,31 @@ SRCS = $(addprefix $(CLIENT_DIR), $(CLIENT_SRCS)) \
 
 
 # Object files mapped to OBJ_DIR
-OBJS = $(addprefix $(OBJ_DIR), $(SRCS:.cpp=.o))
-
-# Replace directory prefix to obj/
-# (e.g., ./core/Server.cpp → ./obj/core/Server.o)
-OBJ_PATHS = $(patsubst %.cpp, $(OBJ_DIR)%.o, $(SRCS))
+OBJ_SRCS = $(SRCS:.cpp=.o)
+OBJS = $(addprefix $(OBJ_DIR), $(OBJ_SRCS))
 
 # Default target
 all: $(NAME)
 
 # Create object directories
 $(OBJ_DIR):
-	@mkdir -p $(OBJ_DIR)
-	@mkdir -p $(OBJ_DIR)client
-	@mkdir -p $(OBJ_DIR)commands
-	@mkdir -p $(OBJ_DIR)core
-	@mkdir -p $(OBJ_DIR)utils
+	@mkdir -p $(OBJ_DIR) $(OBJ_DIR)client $(OBJ_DIR)commands $(OBJ_DIR)core $(OBJ_DIR)utils
+
+# Link all objects to create executable
+$(NAME): $(OBJ_DIR) $(OBJS)
+	$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
 
 # Rule for compiling each .cpp to .o
 $(OBJ_DIR)%.o: %.cpp | $(OBJ_DIR)
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Link all objects to create executable
-$(NAME): $(OBJ_PATHS)
-	$(CC) $(CFLAGS) $(OBJ_PATHS) -o $(NAME)
-
 clean:
-	@rm -f $(OBJS)
+	@rm -rf $(OBJ_DIR)
 
 fclean: clean
 	@rm -f $(NAME)
-	@rm -rf $(OBJ_DIR)
-
+	
 re: fclean all
 
 .PHONY: all clean fclean re
