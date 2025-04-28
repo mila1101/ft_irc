@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eahn <eahn@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: msoklova <msoklova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 17:13:48 by eahn              #+#    #+#             */
-/*   Updated: 2025/04/28 17:38:06 by eahn             ###   ########.fr       */
+/*   Updated: 2025/04/28 18:19:50 by msoklova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ int main(int argc, char** argv)
 
     int port = std::atoi(argv[1]);
     if (port < 1024 || port > 65535) {
-        Logger::error("Invalid port number. Must be between 1 and 65535.");
+        Logger::error("Invalid port number. Must be between 1024 and 65535.");
         return 1;
     }
 
